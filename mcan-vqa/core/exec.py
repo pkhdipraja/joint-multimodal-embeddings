@@ -39,7 +39,7 @@ class Execution:
         data_size = dataset.data_size
         token_size = dataset.token_size
         ans_size = dataset.ans_size
-        pretrained_emb = dataset.pretrained_emb
+        # pretrained_emb = dataset.pretrained_emb
 
         # Define the MCAN model
         net = Net(
@@ -148,6 +148,7 @@ class Execution:
             for step, (
                     img_feat_iter,
                     ques_ix_iter,
+                    att_mask_iter,
                     ans_iter
             ) in enumerate(dataloader):
 
@@ -155,6 +156,7 @@ class Execution:
 
                 img_feat_iter = img_feat_iter.cuda()
                 ques_ix_iter = ques_ix_iter.cuda()
+                att_mask_iter = att_mask_iter.cuda()
                 ans_iter = ans_iter.cuda()
 
                 for accu_step in range(self.__C.GRAD_ACCU_STEPS):
@@ -165,10 +167,12 @@ class Execution:
                     sub_ques_ix_iter = \
                         ques_ix_iter[accu_step * self.__C.SUB_BATCH_SIZE:
                                      (accu_step + 1) * self.__C.SUB_BATCH_SIZE]
+                    sub_att_mask_iter = \
+                        att_mask_iter[accu_step * self.__C.SUB_BATCH_SIZE:
+                                     (accu_step + 1) * self.__C.SUB_BATCH_SIZE]
                     sub_ans_iter = \
                         ans_iter[accu_step * self.__C.SUB_BATCH_SIZE:
                                  (accu_step + 1) * self.__C.SUB_BATCH_SIZE]
-
 
                     pred = net(
                         sub_img_feat_iter,
