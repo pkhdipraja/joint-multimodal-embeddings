@@ -76,12 +76,15 @@ class Cfgs(PATH):
         # (GloVe: spaCy https://spacy.io/)
         self.USE_GLOVE = True
 
+        # Set True to use BERT as encoder to replace question LSTM encoder
+        self.BERT_ENCODER = False
+
         # Word embedding matrix size
         # (token size x WORD_EMBED_SIZE)
         self.WORD_EMBED_SIZE = 300
 
         # Max length of question sentences
-        self.MAX_TOKEN = 14
+        self.MAX_TOKEN = 16
 
         # Filter the answer by occurrence
         # self.ANS_FREQ = 8

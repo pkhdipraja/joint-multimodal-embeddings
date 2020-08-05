@@ -7,6 +7,7 @@
 from core.data.ans_punct import prep_ans
 import numpy as np
 import en_vectors_web_lg, random, re, json
+from transformers import BertTokenizer
 
 
 def shuffle_list(ans_list):
@@ -50,33 +51,57 @@ def ques_load(ques_list):
     return qid_to_ques
 
 
-def tokenize(stat_ques_list, use_glove):
-    token_to_ix = {
-        'PAD': 0,
-        'UNK': 1,
-    }
+def tokenize(stat_ques_list, as_encoder):
+    if as_encoder:
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+        token_to_ix = {  # only for statistic!!
+            'PAD': 0,
+            'UNK': 1,
+            '[CLS]': 2,  # actual ID is 101
+            '[SEP]': 3,  # actual ID is 102
+        }
 
-    spacy_tool = None
-    pretrained_emb = []
-    if use_glove:
-        spacy_tool = en_vectors_web_lg.load()
-        pretrained_emb.append(spacy_tool('PAD').vector)
-        pretrained_emb.append(spacy_tool('UNK').vector)
+        pretrained_emb = None  # cannot use a fixed CWR as BERT is fine-tuned during training
+        for ques in stat_ques_list:
+            words = re.sub(
+                r"([.,'!?\"()*#:;])",
+                '',
+                ques['question'].lower()
+            ).replace('-', ' ').replace('/', ' ')
 
-    for ques in stat_ques_list:
-        words = re.sub(
-            r"([.,'!?\"()*#:;])",
-            '',
-            ques['question'].lower()
-        ).replace('-', ' ').replace('/', ' ').split()
+            words = tokenizer.tokenize(words)
 
-        for word in words:
-            if word not in token_to_ix:
-                token_to_ix[word] = len(token_to_ix)
-                if use_glove:
-                    pretrained_emb.append(spacy_tool(word).vector)
+            for word in words:
+                if word not in token_to_ix:
+                    token_to_ix[word] = len(token_to_ix)
 
-    pretrained_emb = np.array(pretrained_emb)
+    else:  # when using frozen BERT embeddings
+        token_to_ix = {
+            'PAD': 0,
+            'UNK': 1,
+        }
+
+        spacy_tool = None
+        pretrained_emb = []
+        if use_glove:
+            spacy_tool = en_vectors_web_lg.load()
+            pretrained_emb.append(spacy_tool('PAD').vector)
+            pretrained_emb.append(spacy_tool('UNK').vector)
+
+        for ques in stat_ques_list:
+            words = re.sub(
+                r"([.,'!?\"()*#:;])",
+                '',
+                ques['question'].lower()
+            ).replace('-', ' ').replace('/', ' ').split()
+
+            for word in words:
+                if word not in token_to_ix:
+                    token_to_ix[word] = len(token_to_ix)
+                    if use_glove:
+                        pretrained_emb.append(spacy_tool(word).vector)
+
+        pretrained_emb = np.array(pretrained_emb)
 
     return token_to_ix, pretrained_emb
 
@@ -130,24 +155,35 @@ def proc_img_feat(img_feat, img_feat_pad_size):
 
 
 def proc_ques(ques, token_to_ix, max_token):
-    ques_ix = np.zeros(max_token, np.int64)
+    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    # ques_ix = np.zeros(max_token, np.int64) # add 2 more to account for CLS and SEP ?
 
     words = re.sub(
         r"([.,'!?\"()*#:;])",
         '',
         ques['question'].lower()
-    ).replace('-', ' ').replace('/', ' ').split()
+    ).replace('-', ' ').replace('/', ' ')
 
-    for ix, word in enumerate(words):
-        if word in token_to_ix:
-            ques_ix[ix] = token_to_ix[word]
-        else:
-            ques_ix[ix] = token_to_ix['UNK']
+    # for ix, word in enumerate(words):
+    #     if word in token_to_ix:
+    #         ques_ix[ix] = token_to_ix[word]
+    #     else:
+    #         ques_ix[ix] = token_to_ix['UNK']
 
-        if ix + 1 == max_token:
-            break
+    #     if ix + 1 == max_token:
+    #         break
+    encoded_dict = tokenizer.encode_plus(
+                        words,
+                        add_special_tokens=True,
+                        max_length=max_token,  # Pad & truncate all questions
+                        pad_to_max_length=True,
+                        return_attention_mask=True,
+                        return_tensors='pt',
+    )
+    ques_ix = encoded_dict['input_ids']
+    attention_masks = encoded_dict['attention_mask']
 
-    return ques_ix
+    return ques_ix, attention_masks
 
 
 def get_score(occur):
