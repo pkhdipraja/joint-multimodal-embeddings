@@ -51,7 +51,7 @@ def ques_load(ques_list):
     return qid_to_ques
 
 
-def tokenize(stat_ques_list, as_encoder):
+def tokenize(stat_ques_list, as_encoder, use_bert):
     if as_encoder:
         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
         token_to_ix = {  # only for statistic!!
@@ -79,12 +79,19 @@ def tokenize(stat_ques_list, as_encoder):
         token_to_ix = {
             'PAD': 0,
             'UNK': 1,
+            '[CLS]': 2,
+            '[SEP]': 3,      
         }
 
         spacy_tool = None
         pretrained_emb = []
-        if use_glove:
-            spacy_tool = en_vectors_web_lg.load()
+        # if use_glove:
+            # spacy_tool = en_vectors_web_lg.load()
+            # pretrained_emb.append(spacy_tool('PAD').vector)
+            # pretrained_emb.append(spacy_tool('UNK').vector)
+            
+        if use_bert:
+            spacy_tool = en_trf_bertbaseuncased_lg.load()
             pretrained_emb.append(spacy_tool('PAD').vector)
             pretrained_emb.append(spacy_tool('UNK').vector)
 
@@ -98,7 +105,8 @@ def tokenize(stat_ques_list, as_encoder):
             for word in words:
                 if word not in token_to_ix:
                     token_to_ix[word] = len(token_to_ix)
-                    if use_glove:
+                    # if use_glove:
+                    if use_bert:
                         pretrained_emb.append(spacy_tool(word).vector)
 
         pretrained_emb = np.array(pretrained_emb)
