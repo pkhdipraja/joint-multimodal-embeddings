@@ -6,6 +6,7 @@
 
 from core.model.net_utils import FC, MLP, LayerNorm
 from core.model.mca import MCA_ED
+from transformers import BertModel
 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -62,14 +63,26 @@ class Net(nn.Module):
     def __init__(self, __C, pretrained_emb, token_size, answer_size):
         super(Net, self).__init__()
 
-        self.embedding = nn.Embedding(
-            num_embeddings=token_size,
-            embedding_dim=__C.WORD_EMBED_SIZE
-        )
 
-        # Loading the GloVe embedding weights
-        if __C.USE_GLOVE:
-            self.embedding.weight.data.copy_(torch.from_numpy(pretrained_emb))
+        if __C.BERT_ENCODER:
+            self.bert_encode = True
+
+        else:
+            self.bert_encode = False
+            self.embedding = nn.Embedding(
+                num_embeddings=token_size,
+                embedding_dim=__C.WORD_EMBED_SIZE
+            )
+
+        if __C.RUN_MODE == 'train':
+            self.bert_finetune = True  # ensure BERT is finetuned during training
+        else:
+            self.bert_finetune = False
+
+        self.encoder = BertModel.from_pretrained('bert-base-uncased')
+        # Loading the GloVe embedding weights 
+        # if __C.USE_GLOVE:
+        #     self.embedding.weight.data.copy_(torch.from_numpy(pretrained_emb))
 
         self.lstm = nn.LSTM(
             input_size=__C.WORD_EMBED_SIZE,
@@ -92,15 +105,28 @@ class Net(nn.Module):
         self.proj = nn.Linear(__C.FLAT_OUT_SIZE, answer_size)
 
 
-    def forward(self, img_feat, ques_ix):
+    def forward(self, img_feat, att_mask, ques_ix):
 
         # Make mask
         lang_feat_mask = self.make_mask(ques_ix.unsqueeze(2))
         img_feat_mask = self.make_mask(img_feat)
 
-        # Pre-process Language Feature
-        lang_feat = self.embedding(ques_ix)
-        lang_feat, _ = self.lstm(lang_feat)
+        if self.bert_encode:
+            # ensure hidden state DIM is correct / change all to 768 or 1024
+            # re-format to match lstm output, use torch.view()
+
+            # Test this? possibly remove train/eval during refactoring if the one in exec.py runs properly
+            if self.bert_finetune:
+                self.encoder.train()
+            else:
+                self.encoder.eval()
+            outputs = self.encoder(ques_ix, att_mask)
+            last_hidden_state = outputs[0]
+            lang_feat = last_hidden_state[:, 1:-1, :]  # remove CLS and SEP, making this to MAX_TOKEN = 14
+        else:
+            # Pre-process Language Feature
+            lang_feat = self.embedding(ques_ix)
+            lang_feat, _ = self.lstm(lang_feat)
 
         # Pre-process Image Feature
         img_feat = self.img_feat_linear(img_feat)

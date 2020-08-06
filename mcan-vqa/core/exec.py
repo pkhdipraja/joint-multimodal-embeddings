@@ -176,6 +176,7 @@ class Execution:
 
                     pred = net(
                         sub_img_feat_iter,
+                        sub_att_mask_iter,
                         sub_ques_ix_iter
                     )
 
