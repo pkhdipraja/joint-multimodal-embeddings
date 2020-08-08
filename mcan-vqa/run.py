@@ -21,8 +21,8 @@ def parse_args():
                       type=str, required=True)
 
     parser.add_argument('--MODEL', dest='MODEL',
-                      choices=['small', 'large'],
-                      help='{small, large}',
+                      choices=['small', 'large', 'bert_base_encoder'],
+                      help='{small, large, bert_base_encoder}',
                       default='small', type=str)
 
     parser.add_argument('--SPLIT', dest='TRAIN_SPLIT',

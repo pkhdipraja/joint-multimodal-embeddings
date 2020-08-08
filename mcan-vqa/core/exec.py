@@ -5,7 +5,7 @@
 # --------------------------------------------------------
 
 from core.data.load_data import DataSet
-from core.model.net import Net
+from core.model.net import Net, BertMCA
 from core.model.optim import get_optim, adjust_lr
 from core.data.data_utils import shuffle_list
 from utils.vqa import VQA
@@ -39,15 +39,24 @@ class Execution:
         data_size = dataset.data_size
         token_size = dataset.token_size
         ans_size = dataset.ans_size
-        # pretrained_emb = dataset.pretrained_emb
+        pretrained_emb = dataset.pretrained_emb
 
         # Define the MCAN model
-        net = Net(
-            self.__C,
-            pretrained_emb,
-            token_size,
-            ans_size
-        )
+        if self.__C.BERT_ENCODER:
+            net = BertMCA.from_pretrained(
+                "bert-base-uncased",
+                __C=self.__C,
+                pretrained_emb=pretrained_emb,
+                token_size=token_size,
+                answer_size=ans_size,
+            )
+        else:
+            net = Net(
+                self.__C,
+                pretrained_emb,
+                token_size,
+                ans_size
+            )
         net.cuda()
         net.train()
 
@@ -174,11 +183,17 @@ class Execution:
                         ans_iter[accu_step * self.__C.SUB_BATCH_SIZE:
                                  (accu_step + 1) * self.__C.SUB_BATCH_SIZE]
 
-                    pred = net(
-                        sub_img_feat_iter,
-                        sub_att_mask_iter,
-                        sub_ques_ix_iter
-                    )
+                    if self.__C.BERT_ENCODER:
+                        pred = net(
+                            sub_img_feat_iter,
+                            input_ids=sub_ques_ix_iter
+                        )
+                    else:
+                        pred = net(
+                            sub_img_feat_iter,
+                            sub_att_mask_iter,
+                            sub_ques_ix_iter
+                        )
 
                     loss = loss_fn(pred, sub_ans_iter)
                     # only mean-reduction needs be divided by grad_accu_steps

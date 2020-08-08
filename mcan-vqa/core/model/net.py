@@ -6,7 +6,9 @@
 
 from core.model.net_utils import FC, MLP, LayerNorm
 from core.model.mca import MCA_ED
-from transformers import BertModel
+from transformers import BertModel, AlbertModel, BertPreTrainedModel
+from transformers.file_utils import add_start_docstrings, add_start_docstrings_to_callable
+from transformers.modeling_bert import BERT_INPUTS_DOCSTRING
 
 import torch.nn as nn
 import torch.nn.functional as F
@@ -74,12 +76,8 @@ class Net(nn.Module):
                 embedding_dim=__C.WORD_EMBED_SIZE
             )
 
-        if __C.RUN_MODE == 'train':
-            self.bert_finetune = True  # ensure BERT is finetuned during training
-        else:
-            self.bert_finetune = False
-
-        self.encoder = BertModel.from_pretrained('bert-base-uncased')
+        # self.encoder = BertModel.from_pretrained('bert-base-uncased')
+        # self.encoder = AlbertModel.from_pretrained('albert-base-v2')
         # Loading the GloVe embedding weights 
         # if __C.USE_GLOVE:
         #     self.embedding.weight.data.copy_(torch.from_numpy(pretrained_emb))
@@ -105,28 +103,23 @@ class Net(nn.Module):
         self.proj = nn.Linear(__C.FLAT_OUT_SIZE, answer_size)
 
 
-    def forward(self, img_feat, att_mask, ques_ix):
-
+    def forward(self, img_feat, ques_ix, lang_feat):
+        #ques_ix = torch.squeeze(ques_ix)
+        #att_mask = torch.squeeze(att_mask)
         # Make mask
         lang_feat_mask = self.make_mask(ques_ix.unsqueeze(2))
         img_feat_mask = self.make_mask(img_feat)
 
-        if self.bert_encode:
-            # ensure hidden state DIM is correct / change all to 768 or 1024
-            # re-format to match lstm output, use torch.view()
-
-            # Test this? possibly remove train/eval during refactoring if the one in exec.py runs properly
-            if self.bert_finetune:
-                self.encoder.train()
-            else:
-                self.encoder.eval()
-            outputs = self.encoder(ques_ix, att_mask)
-            last_hidden_state = outputs[0]
-            lang_feat = last_hidden_state[:, 1:-1, :]  # remove CLS and SEP, making this to MAX_TOKEN = 14
-        else:
-            # Pre-process Language Feature
-            lang_feat = self.embedding(ques_ix)
-            lang_feat, _ = self.lstm(lang_feat)
+        # if self.bert_encode:
+        #     # ensure hidden state DIM is correct / change all to 768 or 1024
+        #     # re-format to match lstm output, use torch.view()
+        #     outputs = self.encoder(ques_ix, att_mask)
+        #     last_hidden_state = outputs[0]
+        #     lang_feat = last_hidden_state[:, 1:-1, :]  # remove CLS and SEP, making this to MAX_TOKEN = 14
+        # else:
+        # Pre-process Language Feature
+            # lang_feat = self.embedding(ques_ix)
+            # lang_feat, _ = self.lstm(lang_feat)
 
         # Pre-process Image Feature
         img_feat = self.img_feat_linear(img_feat)
@@ -162,3 +155,46 @@ class Net(nn.Module):
             torch.abs(feature),
             dim=-1
         ) == 0).unsqueeze(1).unsqueeze(2)
+
+
+class BertMCA(BertPreTrainedModel):
+    def __init__(self, config):
+        super().__init__(config)
+        self.bert = BertModel(config)
+
+        self.dropout = nn.Dropout(config.hidden_dropout_prob)
+        self.network = Net(config.__C, config.pretrained_emb, config.token_size, config.answer_size)
+
+        self.init_weights()
+   
+    @add_start_docstrings_to_callable(BERT_INPUTS_DOCSTRING.format("(batch_size, sequence_length)"))
+    # @add_code_sample_docstrings(tokenizer_class=_TOKENIZER_FOR_DOC, checkpoint="bert-base-uncased")
+    def forward(
+        self,
+        img_feat,
+        input_ids=None,
+        attention_mask=None,
+        token_type_ids=None,
+        position_ids=None,
+        head_mask=None,
+        inputs_embeds=None,
+        labels=None,
+        output_attentions=None,
+        output_hidden_states=None,
+    ):
+        outputs = self.bert(
+            input_ids,
+            attention_mask=attention_mask,
+            token_type_ids=token_type_ids,
+            position_ids=position_ids,
+            head_mask=head_mask,
+            inputs_embeds=inputs_embeds,
+            output_attentions=output_attentions,
+            output_hidden_states=output_hidden_states,
+        )   
+
+        ques_ix = input_ids[:, 1:-1]
+        lang_feat = outputs[0][:, 1:-1, :]
+
+        proj_feat = self.network(img_feat, ques_ix, lang_feat)
+        return proj_feat

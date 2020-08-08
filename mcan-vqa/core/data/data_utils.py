@@ -7,7 +7,7 @@
 from core.data.ans_punct import prep_ans
 import numpy as np
 import en_vectors_web_lg, random, re, json
-from transformers import BertTokenizer
+from transformers import BertTokenizer, AlbertTokenizer
 
 
 def shuffle_list(ans_list):
@@ -54,6 +54,7 @@ def ques_load(ques_list):
 def tokenize(stat_ques_list, as_encoder):
     if as_encoder:
         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+        # tokenizer = AlbertTokenizer.from_pretrained('albert-base-v2', do_lower_case=True)
         token_to_ix = {  # only for statistic!!
             'PAD': 0,
             'UNK': 1,
@@ -156,6 +157,7 @@ def proc_img_feat(img_feat, img_feat_pad_size):
 
 def proc_ques(ques, token_to_ix, max_token):
     tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
+    # tokenizer = AlbertTokenizer.from_pretrained('albert-base-v2', do_lower_case=True)
     # ques_ix = np.zeros(max_token, np.int64) # add 2 more to account for CLS and SEP ?
 
     words = re.sub(

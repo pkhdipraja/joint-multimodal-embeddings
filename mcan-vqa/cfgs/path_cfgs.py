@@ -13,7 +13,7 @@ class PATH:
         self.DATASET_PATH = '/home/users/pkahardipraja/data/vqa/'
 
         # bottom up features root path
-        self.FEATURE_PATH = '/home/users/pkahardipraja/coco_extract/'
+        self.FEATURE_PATH = '/home/users/pkahardipraja/data/coco_extract/'
 
         self.init_path()
 

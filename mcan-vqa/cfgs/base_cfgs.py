@@ -81,7 +81,7 @@ class Cfgs(PATH):
 
         # Word embedding matrix size
         # (token size x WORD_EMBED_SIZE)
-        self.WORD_EMBED_SIZE = 300
+        self.WORD_EMBED_SIZE = 768
 
         # Max length of question sentences
         self.MAX_TOKEN = 16
