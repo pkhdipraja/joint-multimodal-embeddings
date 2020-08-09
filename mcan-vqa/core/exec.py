@@ -5,11 +5,12 @@
 # --------------------------------------------------------
 
 from core.data.load_data import DataSet
-from core.model.net import Net, BertMCA
+from core.model.net import Net
 from core.model.optim import get_optim, adjust_lr
 from core.data.data_utils import shuffle_list
 from utils.vqa import VQA
 from utils.vqaEval import VQAEval
+from torch.utils.tensorboard import SummaryWriter
 
 import os, json, torch, datetime, pickle, copy, shutil, time
 import numpy as np
@@ -41,22 +42,16 @@ class Execution:
         ans_size = dataset.ans_size
         pretrained_emb = dataset.pretrained_emb
 
+        # Tensorboard
+        writer = SummaryWriter('/cache/tensorboard-logdir/' + __C.CKPT_VERSION)
+
         # Define the MCAN model
-        if self.__C.BERT_ENCODER:
-            net = BertMCA.from_pretrained(
-                "bert-base-uncased",
-                __C=self.__C,
-                pretrained_emb=pretrained_emb,
-                token_size=token_size,
-                answer_size=ans_size,
-            )
-        else:
-            net = Net(
-                self.__C,
-                pretrained_emb,
-                token_size,
-                ans_size
-            )
+        net = Net(
+            self.__C,
+            pretrained_emb,
+            token_size,
+            ans_size
+        )
         net.cuda()
         net.train()
 
@@ -157,7 +152,6 @@ class Execution:
             for step, (
                     img_feat_iter,
                     ques_ix_iter,
-                    att_mask_iter,
                     ans_iter
             ) in enumerate(dataloader):
 
@@ -165,7 +159,6 @@ class Execution:
 
                 img_feat_iter = img_feat_iter.cuda()
                 ques_ix_iter = ques_ix_iter.cuda()
-                att_mask_iter = att_mask_iter.cuda()
                 ans_iter = ans_iter.cuda()
 
                 for accu_step in range(self.__C.GRAD_ACCU_STEPS):
@@ -176,24 +169,14 @@ class Execution:
                     sub_ques_ix_iter = \
                         ques_ix_iter[accu_step * self.__C.SUB_BATCH_SIZE:
                                      (accu_step + 1) * self.__C.SUB_BATCH_SIZE]
-                    sub_att_mask_iter = \
-                        att_mask_iter[accu_step * self.__C.SUB_BATCH_SIZE:
-                                     (accu_step + 1) * self.__C.SUB_BATCH_SIZE]
                     sub_ans_iter = \
                         ans_iter[accu_step * self.__C.SUB_BATCH_SIZE:
                                  (accu_step + 1) * self.__C.SUB_BATCH_SIZE]
 
-                    if self.__C.BERT_ENCODER:
-                        pred = net(
-                            sub_img_feat_iter,
-                            input_ids=sub_ques_ix_iter
-                        )
-                    else:
-                        pred = net(
-                            sub_img_feat_iter,
-                            sub_att_mask_iter,
-                            sub_ques_ix_iter
-                        )
+                    pred = net(
+                        sub_img_feat_iter,
+                        sub_ques_ix_iter
+                    )
 
                     loss = loss_fn(pred, sub_ans_iter)
                     # only mean-reduction needs be divided by grad_accu_steps
@@ -218,6 +201,12 @@ class Execution:
                             loss.cpu().data.numpy() / self.__C.SUB_BATCH_SIZE,
                             optim._rate
                         ), end='          ')
+
+                if step % 1000 == 999:  # for every 1000 minibatches log the running loss
+                    writer.add_scalar('training loss',
+                                      loss_sum / 1000,
+                                      epoch * len(dataloader) + step
+                    )
 
                 # Gradient norm clipping
                 if self.__C.GRAD_NORM_CLIP > 0:
