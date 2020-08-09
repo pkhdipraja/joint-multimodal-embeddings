@@ -43,7 +43,7 @@ class Execution:
         pretrained_emb = dataset.pretrained_emb
 
         # Tensorboard
-        writer = SummaryWriter('/cache/tensorboard-logdir/' + __C.CKPT_VERSION)
+        writer = SummaryWriter('/cache/tensorboard-logdir/' + self.__C.CKPT_VERSION)
 
         # Define the MCAN model
         net = Net(
