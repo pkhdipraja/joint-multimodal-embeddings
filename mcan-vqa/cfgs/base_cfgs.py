@@ -74,14 +74,20 @@ class Cfgs(PATH):
 
         # Set True to use pretrained word embedding
         # (GloVe: spaCy https://spacy.io/)
-        self.USE_GLOVE = True
+        # self.USE_GLOVE = True
+        
+        # Set True to use pretrained BERT embeddings
+        self.USE_BERT = True
 
         # Set True to use BERT as encoder to replace question LSTM encoder
         self.BERT_ENCODER = False
 
         # Word embedding matrix size
         # (token size x WORD_EMBED_SIZE)
-        self.WORD_EMBED_SIZE = 300
+        # self.WORD_EMBED_SIZE = 300 # size for GloVe embedding
+        
+        # adjust size for BERT embedding
+        self.WORD_EMBED_SIZE = 768
 
         # Max length of question sentences
         self.MAX_TOKEN = 16  # adjusted for [CLS] and [SEP]

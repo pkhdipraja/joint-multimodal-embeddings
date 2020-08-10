@@ -73,6 +73,7 @@ class Net(nn.Module):
                 embedding_dim=__C.WORD_EMBED_SIZE
             )
 
+
         # Loading the GloVe embedding weights 
         # if __C.USE_GLOVE:
         #     self.embedding.weight.data.copy_(torch.from_numpy(pretrained_emb))
