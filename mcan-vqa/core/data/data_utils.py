@@ -8,6 +8,8 @@ from core.data.ans_punct import prep_ans
 import numpy as np
 import en_vectors_web_lg, random, re, json
 import torch
+from transformers import BertTokenizer, BertModel
+
 
 def shuffle_list(ans_list):
     random.shuffle(ans_list)
@@ -78,33 +80,46 @@ def tokenize(stat_ques_list, tokenizer, encoder_flag=False):
             '[SEP]': 3,      
         }
 
-        spacy_tool = None
-        pretrained_emb = []
-        # if use_glove:
-            # spacy_tool = en_vectors_web_lg.load()
-            # pretrained_emb.append(spacy_tool('PAD').vector)
-            # pretrained_emb.append(spacy_tool('UNK').vector)
-            
-        if use_bert:
-            spacy_tool = en_trf_bertbaseuncased_lg.load()
-            pretrained_emb.append(spacy_tool('PAD').vector)
-            pretrained_emb.append(spacy_tool('UNK').vector)
-
         for ques in stat_ques_list:
             words = re.sub(
                 r"([.,'!?\"()*#:;])",
                 '',
                 ques['question'].lower()
-            ).replace('-', ' ').replace('/', ' ').split()
+            ).replace('-', ' ').replace('/', ' ')
+            marked_ques = "[CLS] " + words + " [SEP]"
+            tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+            tokenized_ques = tokenizer.tokenize(marked_ques)
 
-            for word in words:
+            indexed_tokens = tokenizer.convert_tokens_to_ids(tokenized_ques)
+            segments_ids = [1] * len(tokenized_ques)
+
+            tokens_tensor = torch.tensor([indexed_tokens])
+            segments_tensors = torch.tensor([segments_ids])
+
+            model = BertModel.from_pretrained('bert-base-uncased', 
+                                          output_hidden_states=True)
+            # feed-forward operation
+            model.eval()
+
+            with torch.no_grad():
+                outputs = model(tokens_tensor, segments_tensors)
+                hidden_states = outputs[2]
+                # Concatenate the tensors for all layers.
+                token_embeddings = torch.stack(hidden_states, dim=0)
+                token_embeddings = torch.squeeze(token_embeddings, dim=1)
+                token_embeddings = token_embeddings.permute(1, 0, 2)
+
+                pretrained_emb = []
+
+                for token in token_embeddings:
+                    sum_vec = torch.sum(token[-4:],dim=0)
+                    pretrained_emb.append(sum_vec)
+
+            pretrained_emb = torch.stack(pretrained_emb)
+
+            for word in tokenized_ques:
                 if word not in token_to_ix:
                     token_to_ix[word] = len(token_to_ix)
-                    # if use_glove:
-                    if use_bert:
-                        pretrained_emb.append(spacy_tool(word).vector)
-
-        pretrained_emb = np.array(pretrained_emb)
 
     return token_to_ix, pretrained_emb
 
