@@ -78,6 +78,9 @@ class Net(nn.Module):
         # if __C.USE_GLOVE:
         #     self.embedding.weight.data.copy_(torch.from_numpy(pretrained_emb))
 
+        if __C.USE_BERT:
+            self.embedding.weight.data.copy_(pretrained_emb)
+        
         self.lstm = nn.LSTM(
             input_size=__C.WORD_EMBED_SIZE,
             hidden_size=__C.HIDDEN_SIZE,
