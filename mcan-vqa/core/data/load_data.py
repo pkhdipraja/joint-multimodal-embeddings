@@ -6,7 +6,7 @@
 
 from core.data.data_utils import img_feat_path_load, img_feat_load, ques_load, tokenize, ans_stat
 from core.data.data_utils import proc_img_feat, proc_ques, proc_ans
-from transformers import BertTokenizerFast
+from transformers import BertTokenizerFast, BertModel
 
 import numpy as np
 import glob, json, torch, time
@@ -74,7 +74,8 @@ class DataSet(Data.Dataset):
         # ---- Data statistic ----
         # ------------------------
         self.tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased', do_lower_case=True)
-
+        self.model = BertModel.from_pretrained('bert-base-uncased', output_hidden_states=True)
+        
         # {image id} -> {image feature absolutely path}
         if self.__C.PRELOAD:
             print('==== Pre-Loading features ...')
@@ -89,7 +90,7 @@ class DataSet(Data.Dataset):
         self.qid_to_ques = ques_load(self.ques_list)
 
         # Tokenize
-        self.token_to_ix, self.pretrained_emb = tokenize(self.stat_ques_list, self.tokenizer, __C.BERT_ENCODER)
+        self.token_to_ix, self.pretrained_emb = tokenize(self.stat_ques_list, self.tokenizer, __C.BERT_ENCODER, self.model)
         self.token_size = self.token_to_ix.__len__()
         print('== Question token vocab size:', self.token_size)
 
