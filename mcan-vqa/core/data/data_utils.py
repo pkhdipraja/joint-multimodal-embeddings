@@ -8,7 +8,6 @@ from core.data.ans_punct import prep_ans
 import numpy as np
 import en_vectors_web_lg, random, re, json
 import torch
-from transformers import BertTokenizer, BertModel
 
 
 def shuffle_list(ans_list):
@@ -86,18 +85,14 @@ def tokenize(stat_ques_list, tokenizer, encoder_flag=False):
                 '',
                 ques['question'].lower()
             ).replace('-', ' ').replace('/', ' ')
+
             marked_ques = "[CLS] " + words + " [SEP]"
-            tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
             tokenized_ques = tokenizer.tokenize(marked_ques)
-
             indexed_tokens = tokenizer.convert_tokens_to_ids(tokenized_ques)
-            segments_ids = [1] * len(tokenized_ques)
-
+            segments_ids = [1] * len(tokenized_ques)  
             tokens_tensor = torch.tensor([indexed_tokens])
             segments_tensors = torch.tensor([segments_ids])
 
-            model = BertModel.from_pretrained('bert-base-uncased', 
-                                          output_hidden_states=True)
             # feed-forward operation
             model.eval()
 
@@ -112,10 +107,11 @@ def tokenize(stat_ques_list, tokenizer, encoder_flag=False):
                 pretrained_emb = []
 
                 for token in token_embeddings:
-                    sum_vec = torch.sum(token[-4:],dim=0)
+                    sum_vec = torch.sum(token[-4:],dim=0) # sum up last 4 layers
                     pretrained_emb.append(sum_vec)
 
             pretrained_emb = torch.stack(pretrained_emb)
+            pretrained_emb = pretrained_emb.numpy()
 
             for word in tokenized_ques:
                 if word not in token_to_ix:
