@@ -6,8 +6,10 @@
 
 from core.data.ans_punct import prep_ans
 import numpy as np
-import en_vectors_web_lg, random, re, json
-from transformers import BertTokenizer
+import random, re, json
+#import en_vectors_web_lg, random, re, json
+import torch
+from transformers import BertModel
 
 
 def shuffle_list(ans_list):
@@ -51,17 +53,10 @@ def ques_load(ques_list):
     return qid_to_ques
 
 
-def tokenize(stat_ques_list, as_encoder):
-    if as_encoder:
-        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
-        token_to_ix = {  # only for statistic!!
-            'PAD': 0,
-            'UNK': 1,
-            '[CLS]': 2,  # actual ID is 101
-            '[SEP]': 3,  # actual ID is 102
-        }
+def tokenize(stat_ques_list, tokenizer, encoder_flag=False, model):
+    if encoder_flag:
+        token_to_ix = {}  # only for statistic!!
 
-        pretrained_emb = None  # cannot use a fixed CWR as BERT is fine-tuned during training
         for ques in stat_ques_list:
             words = re.sub(
                 r"([.,'!?\"()*#:;])",
@@ -70,38 +65,59 @@ def tokenize(stat_ques_list, as_encoder):
             ).replace('-', ' ').replace('/', ' ')
 
             words = tokenizer.tokenize(words)
+            ids = tokenizer.convert_tokens_to_ids(words)
 
-            for word in words:
-                if word not in token_to_ix:
-                    token_to_ix[word] = len(token_to_ix)
+            for tup in zip(words, ids):
+                if tup[0] not in token_to_ix:
+                    token_to_ix[tup[0]] = tup[1]
+            
+            pretrained_emb = None  # cannot use a fixed CWR as BERT is fine-tuned during training
 
     else:  # when using frozen BERT embeddings
         token_to_ix = {
             'PAD': 0,
             'UNK': 1,
+            '[CLS]': 2,
+            '[SEP]': 3,      
         }
-
-        spacy_tool = None
-        pretrained_emb = []
-        if use_glove:
-            spacy_tool = en_vectors_web_lg.load()
-            pretrained_emb.append(spacy_tool('PAD').vector)
-            pretrained_emb.append(spacy_tool('UNK').vector)
 
         for ques in stat_ques_list:
             words = re.sub(
                 r"([.,'!?\"()*#:;])",
                 '',
                 ques['question'].lower()
-            ).replace('-', ' ').replace('/', ' ').split()
+            ).replace('-', ' ').replace('/', ' ')
+            
+            marked_ques = "[CLS] " + words + " [SEP]"
+            tokenized_ques = tokenizer.tokenize(marked_ques)
+            indexed_tokens = tokenizer.convert_tokens_to_ids(tokenized_ques)
+            segments_ids = [1] * len(tokenized_ques)  
+            tokens_tensor = torch.tensor([indexed_tokens])
+            segments_tensors = torch.tensor([segments_ids])
 
-            for word in words:
+            # feed-forward operation
+            model.eval()
+
+            with torch.no_grad():
+                outputs = model(tokens_tensor, segments_tensors)
+                hidden_states = outputs[2]
+                # Concatenate the tensors for all layers.
+                token_embeddings = torch.stack(hidden_states, dim=0)
+                token_embeddings = torch.squeeze(token_embeddings, dim=1)
+                token_embeddings = token_embeddings.permute(1, 0, 2)
+
+                pretrained_emb = []
+                
+                for token in token_embeddings:
+                    sum_vec = torch.sum(token[-4:],dim=0) # sum up last 4 layers
+                    pretrained_emb.append(sum_vec)
+
+            pretrained_emb = torch.stack(pretrained_emb)
+            pretrained_emb = pretrained_emb.numpy()
+
+            for word in tokenized_ques:
                 if word not in token_to_ix:
                     token_to_ix[word] = len(token_to_ix)
-                    if use_glove:
-                        pretrained_emb.append(spacy_tool(word).vector)
-
-        pretrained_emb = np.array(pretrained_emb)
 
     return token_to_ix, pretrained_emb
 
@@ -154,9 +170,7 @@ def proc_img_feat(img_feat, img_feat_pad_size):
     return img_feat
 
 
-def proc_ques(ques, token_to_ix, max_token):
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', do_lower_case=True)
-    # ques_ix = np.zeros(max_token, np.int64) # add 2 more to account for CLS and SEP ?
+def proc_ques(ques, token_to_ix, max_token, tokenizer):
 
     words = re.sub(
         r"([.,'!?\"()*#:;])",
@@ -164,26 +178,17 @@ def proc_ques(ques, token_to_ix, max_token):
         ques['question'].lower()
     ).replace('-', ' ').replace('/', ' ')
 
-    # for ix, word in enumerate(words):
-    #     if word in token_to_ix:
-    #         ques_ix[ix] = token_to_ix[word]
-    #     else:
-    #         ques_ix[ix] = token_to_ix['UNK']
-
-    #     if ix + 1 == max_token:
-    #         break
     encoded_dict = tokenizer.encode_plus(
                         words,
                         add_special_tokens=True,
                         max_length=max_token,  # Pad & truncate all questions
                         pad_to_max_length=True,
-                        return_attention_mask=True,
                         return_tensors='pt',
-    )
+                    )
     ques_ix = encoded_dict['input_ids']
-    attention_masks = encoded_dict['attention_mask']
+    ques_ix = torch.squeeze(ques_ix)
 
-    return ques_ix, attention_masks
+    return ques_ix
 
 
 def get_score(occur):
