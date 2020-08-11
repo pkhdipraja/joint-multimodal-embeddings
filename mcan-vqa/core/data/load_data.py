@@ -90,8 +90,7 @@ class DataSet(Data.Dataset):
         self.qid_to_ques = ques_load(self.ques_list)
 
         # Tokenize
-        
-        self.token_to_ix, self.pretrained_emb = tokenize(self.stat_ques_list, self.tokenizer, __C.BERT_ENCODER, self.model)
+        self.token_to_ix, self.pretrained_emb = tokenize(self.stat_ques_list, self.tokenizer, self.model, self.__C.MAX_TOKEN, __C.BERT_ENCODER)
         self.token_size = self.token_to_ix.__len__()
         print('== Question token vocab size:', self.token_size)
 
