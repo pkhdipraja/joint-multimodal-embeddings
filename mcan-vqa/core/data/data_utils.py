@@ -197,7 +197,7 @@ def proc_ques(ques, token_to_ix, max_token, tokenizer):
                         return_tensors='pt',
                     )
     ques_ix = encoded_dict['input_ids']
-    #ques_ix = torch.squeeze(ques_ix)
+    ques_ix = torch.squeeze(ques_ix)
     print(ques_ix.size())
     return ques_ix
 
