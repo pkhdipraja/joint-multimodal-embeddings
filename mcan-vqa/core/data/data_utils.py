@@ -198,7 +198,7 @@ def proc_ques(ques, token_to_ix, max_token, tokenizer):
                     )
     ques_ix = encoded_dict['input_ids']
     ques_ix = torch.squeeze(ques_ix)
-    print(ques_ix.size())
+
     return ques_ix
 
 def get_score(occur):
