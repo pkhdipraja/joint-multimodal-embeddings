@@ -10,6 +10,7 @@ from core.model.optim import get_optim, adjust_lr
 from core.data.data_utils import shuffle_list
 from utils.vqa import VQA
 from utils.vqaEval import VQAEval
+# from torch.utils.tensorboard import SummaryWriter
 
 import os, json, torch, datetime, pickle, copy, shutil, time
 import numpy as np
@@ -40,6 +41,9 @@ class Execution:
         token_size = dataset.token_size
         ans_size = dataset.ans_size
         pretrained_emb = dataset.pretrained_emb
+
+        # Tensorboard
+        # writer = SummaryWriter('/cache/tensorboard-logdir/' + self.__C.CKPT_VERSION)
 
         # Define the MCAN model
         net = Net(
@@ -75,7 +79,7 @@ class Execution:
 
             # Load the network parameters
             print('Loading ckpt {}'.format(path))
-            ckpt = torch.load(path)
+            ckpt = torch.load(path, map_location='cpu')
             print('Finish!')
             net.load_state_dict(ckpt['state_dict'])
 
@@ -169,7 +173,6 @@ class Execution:
                         ans_iter[accu_step * self.__C.SUB_BATCH_SIZE:
                                  (accu_step + 1) * self.__C.SUB_BATCH_SIZE]
 
-
                     pred = net(
                         sub_img_feat_iter,
                         sub_ques_ix_iter
@@ -198,6 +201,12 @@ class Execution:
                             loss.cpu().data.numpy() / self.__C.SUB_BATCH_SIZE,
                             optim._rate
                         ), end='          ')
+
+                # if step % 1000 == 999:  # for every 1000 minibatches log the running loss
+                #     writer.add_scalar('training loss',
+                #                       loss_sum / 1000,
+                #                       epoch * len(dataloader) + step
+                #     )
 
                 # Gradient norm clipping
                 if self.__C.GRAD_NORM_CLIP > 0:

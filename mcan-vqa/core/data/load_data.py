@@ -6,6 +6,7 @@
 
 from core.data.data_utils import img_feat_path_load, img_feat_load, ques_load, tokenize, ans_stat
 from core.data.data_utils import proc_img_feat, proc_ques, proc_ans
+from transformers import BertTokenizerFast
 
 import numpy as np
 import glob, json, torch, time
@@ -72,6 +73,7 @@ class DataSet(Data.Dataset):
         # ------------------------
         # ---- Data statistic ----
         # ------------------------
+        self.tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased', do_lower_case=True)
 
         # {image id} -> {image feature absolutely path}
         if self.__C.PRELOAD:
@@ -87,7 +89,7 @@ class DataSet(Data.Dataset):
         self.qid_to_ques = ques_load(self.ques_list)
 
         # Tokenize
-        self.token_to_ix, self.pretrained_emb = tokenize(self.stat_ques_list, __C.USE_GLOVE)
+        self.token_to_ix, self.pretrained_emb = tokenize(self.stat_ques_list, self.tokenizer, __C.BERT_ENCODER)
         self.token_size = self.token_to_ix.__len__()
         print('== Question token vocab size:', self.token_size)
 
@@ -130,7 +132,7 @@ class DataSet(Data.Dataset):
             img_feat_iter = proc_img_feat(img_feat_x, self.__C.IMG_FEAT_PAD_SIZE)
 
             # Process question
-            ques_ix_iter = proc_ques(ques, self.token_to_ix, self.__C.MAX_TOKEN)
+            ques_ix_iter = proc_ques(ques, self.token_to_ix, self.__C.MAX_TOKEN, self.tokenizer)
 
             # Process answer
             ans_iter = proc_ans(ans, self.ans_to_ix)
@@ -151,15 +153,11 @@ class DataSet(Data.Dataset):
             img_feat_iter = proc_img_feat(img_feat_x, self.__C.IMG_FEAT_PAD_SIZE)
 
             # Process question
-            ques_ix_iter = proc_ques(ques, self.token_to_ix, self.__C.MAX_TOKEN)
-
+            ques_ix_iter = proc_ques(ques, self.token_to_ix, self.__C.MAX_TOKEN, self.tokenizer)
 
         return torch.from_numpy(img_feat_iter), \
-               torch.from_numpy(ques_ix_iter), \
+               ques_ix_iter, \
                torch.from_numpy(ans_iter)
-
 
     def __len__(self):
         return self.data_size
-
-
