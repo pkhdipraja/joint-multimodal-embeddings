@@ -1,11 +1,13 @@
 # --------------------------------------------------------
-# mcan-vqa (Deep Modular Co-Attention Networks)
-# Licensed under The MIT License [see LICENSE for details]
+# OpenVQA
 # Written by Yuhao Cui https://github.com/cuiyuhao1996
 # --------------------------------------------------------
 
-from core.model.net_utils import FC, MLP, LayerNorm
-from core.model.mca import MCA_ED
+from openvqa.utils.make_mask import make_mask
+from openvqa.ops.fc import FC, MLP
+from openvqa.ops.layer_norm import LayerNorm
+from openvqa.models.mcan.mca import MCA_ED
+from openvqa.models.mcan.adapter import Adapter
 from transformers import BertModel
 
 import torch.nn as nn
@@ -52,7 +54,7 @@ class AttFlat(nn.Module):
         x_atted = torch.cat(att_list, dim=1)
         x_atted = self.linear_merge(x_atted)
 
-        return x_atted
+        return x_atted, att
 
 
 # -------------------------
@@ -62,21 +64,22 @@ class AttFlat(nn.Module):
 class Net(nn.Module):
     def __init__(self, __C, pretrained_emb, token_size, answer_size):
         super(Net, self).__init__()
+        self.__C = __C
 
-        if __C.BERT_ENCODER:
-            self.bert_encode = True
-            self.encoder = BertModel.from_pretrained(__C.BERT_VER)
-        else:
-            self.bert_encode = False
+        if self.__C.BERT_ENCODER:
+            self.encoder = BertModel.from_pretrained(self.BERT_VER)
+        elif not self.__C.BERT_ENCODER and self.__C.USE_BERT:
+            self.bert_layer = BertModel.from_pretrained(self.BERT_VER)
+            # Freeze BERT layers
+            for param in self.bert_layer.parameters():
+                param.requires_grad = False
+        # Loading the GloVe embedding weights
+        elif __C.USE_GLOVE:
             self.embedding = nn.Embedding(
                 num_embeddings=token_size,
                 embedding_dim=__C.WORD_EMBED_SIZE
             )
-
-
-        # Loading the GloVe embedding weights 
-        # if __C.USE_GLOVE:
-        #     self.embedding.weight.data.copy_(torch.from_numpy(pretrained_emb))
+            self.embedding.weight.data.copy_(torch.from_numpy(pretrained_emb))
 
         self.lstm = nn.LSTM(
             input_size=__C.WORD_EMBED_SIZE,
@@ -85,37 +88,40 @@ class Net(nn.Module):
             batch_first=True
         )
 
-        self.img_feat_linear = nn.Linear(
-            __C.IMG_FEAT_SIZE,
-            __C.HIDDEN_SIZE
-        )
+        self.adapter = Adapter(__C)
 
         self.backbone = MCA_ED(__C)
 
+        # Flatten to vector
         self.attflat_img = AttFlat(__C)
         self.attflat_lang = AttFlat(__C)
 
+        # Classification layers
         self.proj_norm = LayerNorm(__C.FLAT_OUT_SIZE)
         self.proj = nn.Linear(__C.FLAT_OUT_SIZE, answer_size)
 
-    def forward(self, img_feat, ques_ix):
-        # Make mask
-        lang_feat_mask = self.make_mask(ques_ix[:, 1:-1].unsqueeze(2))
-        img_feat_mask = self.make_mask(img_feat)
 
-        if self.bert_encode:
-            # ensure hidden state DIM is correct / change all to 768 or 1024
-            # re-format to match lstm output, use torch.view()
+    def forward(self, frcn_feat, grid_feat, bbox_feat, ques_ix):
+
+        # Pre-process Language Feature
+        if self.__C.USE_BERT:
+            lang_feat_mask = make_mask(ques_ix[:, 1:-1].unsqueeze(2))
+        else:
+            lang_feat_mask = make_mask(ques_ix.unsqueeze(2))
+
+        if self.__C.BERT_ENCODER:
             outputs = self.encoder(ques_ix)
             last_hidden_state = outputs[0]
-            lang_feat = last_hidden_state[:, 1:-1, :]  # remove CLS and SEP, making this to MAX_TOKEN = 14
-        else:
-            # Pre-process Language Feature
+            lang_feat = last_hidden_state[:, 1:-1, :] # remove CLS and SEP, making this to max_token=14
+        elif not self.__C.BERT_ENCODER and self.__C.USE_BERT:
+            outputs = self.bert_layer(ques_ix)
+            last_hidden_state = outputs[0][:, 1:-1, :] # remove CLS and SEP, making this to max_token=14
+            lang_feat, _ = self.lstm(last_hidden_state)
+        elif self.__C.USE_GLOVE:
             lang_feat = self.embedding(ques_ix)
             lang_feat, _ = self.lstm(lang_feat)
 
-        # Pre-process Image Feature
-        img_feat = self.img_feat_linear(img_feat)
+        img_feat, img_feat_mask = self.adapter(frcn_feat, grid_feat, bbox_feat)
 
         # Backbone Framework
         lang_feat, img_feat = self.backbone(
@@ -125,50 +131,21 @@ class Net(nn.Module):
             img_feat_mask
         )
 
-        lang_feat = self.attflat_lang(
+        # Flatten to vector
+        lang_feat, _ = self.attflat_lang(
             lang_feat,
             lang_feat_mask
         )
 
-        img_feat = self.attflat_img(
+        img_feat, img_att = self.attflat_img(
             img_feat,
             img_feat_mask
         )
 
+        # Classification layers
         proj_feat = lang_feat + img_feat
         proj_feat = self.proj_norm(proj_feat)
-        proj_feat = torch.sigmoid(self.proj(proj_feat))
+        proj_feat = self.proj(proj_feat)
 
-        return proj_feat
+        return proj_feat, img_att
 
-
-    # Masking
-    def make_mask(self, feature):
-        return (torch.sum(
-            torch.abs(feature),
-            dim=-1
-        ) == 0).unsqueeze(1).unsqueeze(2)
-
-
-# class BertMCA(nn.Module):
-#     def __init__(self, config, __C, pretrained_emb, token_size, answer_size, bertmodel):
-#         super().__init__()
-#         self.bert = bertmodel
-#         self.config = config
-#         self.dropout = nn.Dropout(self.config.hidden_dropout_prob)
-#         self.network = Net(__C, pretrained_emb, token_size, answer_size)
-
-#     # @add_start_docstrings_to_callable(BERT_INPUTS_DOCSTRING.format("(batch_size, sequence_length)"))
-#     # @add_code_sample_docstrings(tokenizer_class=_TOKENIZER_FOR_DOC, checkpoint="bert-base-uncased")
-#     def forward(
-#         self,
-#         img_feat,
-#         input_ids
-#     ):  
-#         outputs = self.bert(input_ids)
-
-#         ques_ix = input_ids[:, 1:-1]
-#         lang_feat = outputs[0][:, 1:-1, :]
-
-#         proj_feat = self.network(img_feat, ques_ix, lang_feat)
-#         return proj_feat

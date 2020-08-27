@@ -73,7 +73,7 @@ class DataSet(Data.Dataset):
         # ------------------------
         # ---- Data statistic ----
         # ------------------------
-        self.tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased', do_lower_case=True)
+        self.tokenizer = BertTokenizerFast.from_pretrained(__C.BERT_VER, do_lower_case=True)
 
         # {image id} -> {image feature absolutely path}
         if self.__C.PRELOAD:
