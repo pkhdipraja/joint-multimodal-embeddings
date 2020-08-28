@@ -67,9 +67,9 @@ class Net(nn.Module):
         self.__C = __C
 
         if self.__C.BERT_ENCODER:
-            self.encoder = BertModel.from_pretrained(self.BERT_VER)
+            self.encoder = BertModel.from_pretrained(self.__C.BERT_VER)
         elif not self.__C.BERT_ENCODER and self.__C.USE_BERT:
-            self.bert_layer = BertModel.from_pretrained(self.BERT_VER)
+            self.bert_layer = BertModel.from_pretrained(self.__C.BERT_VER)
             # Freeze BERT layers
             for param in self.bert_layer.parameters():
                 param.requires_grad = False
