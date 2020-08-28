@@ -29,7 +29,10 @@ def parse_args():
                            'mfh',
                            'mem',
                            'butd',
-                           'mmnasnet'
+                           'mmnasnet',
+                           'mcan_small_BERT_base',
+                           'mcan_small_BERT_large',
+                           'mcan_BERT_base_encoder'
                            ]
                         ,
                       help='{'
@@ -41,6 +44,9 @@ def parse_args():
                            'mfh,'
                            'butd,'
                            'mmnasnet,'
+                           'mcan_small_BERT_base,'
+                           'mcan_small_BERT_large,'
+                           'mcan_BERT_base_encoder,'
                            '}'
                         ,
                       type=str, required=True)
