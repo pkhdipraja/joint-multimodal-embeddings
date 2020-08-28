@@ -25,6 +25,6 @@ LOSS_REDUCTION: sum
 OPT: Adam
 OPT_PARAMS: {betas: '(0.9, 0.98)', eps: '1e-9'}
 WORD_EMBED_SIZE: 768
-BERT_VER: 'bert_base_uncased'
+BERT_VER: 'bert-base-uncased'
 BERT_ENCODER: True
 USE_BERT: True
