@@ -193,7 +193,7 @@ class DataSet(BaseDataSet):
         iid = self.ques_dict[qid]['imageId']
 
         ques = self.ques_dict[qid]['question']
-        ques_ix_iter = self.proc_ques(ques, self.token_to_ix, max_token=self.max_token, self.tokenizer)
+        ques_ix_iter = self.proc_ques(ques, self.token_to_ix, self.max_token, self.tokenizer)
         ans_iter = np.zeros(1)
 
         if self.__C.RUN_MODE in ['train']:
