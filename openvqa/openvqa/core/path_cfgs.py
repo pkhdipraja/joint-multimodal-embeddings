@@ -13,7 +13,7 @@ class PATH:
 
     def init_path(self):
 
-        self.DATA_ROOT = './data'
+        self.DATA_ROOT = '/home/users/pkahardipraja/data'
         # self.DATA_ROOT = '/data/datasets'
         # self.DATA_ROOT = '/data1/datasets'
         # self.DATA_ROOT = '/home/features'
