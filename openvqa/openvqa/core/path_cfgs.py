@@ -27,9 +27,9 @@ class PATH:
 
         self.FEATS_PATH = {
             'vqa': {
-                'train': self.DATA_PATH['vqa'] + '/feats' + '/train2014',
-                'val': self.DATA_PATH['vqa'] + '/feats' + '/val2014',
-                'test': self.DATA_PATH['vqa'] + '/feats' + '/test2015',
+                'train': '/home/users/pkahardipraja/data' + '/coco_extract' + '/train2014',
+                'val': '/home/users/pkahardipraja/data' + '/coco_extract' + '/val2014',
+                'test': '/home/users/pkahardipraja/data' + '/coco_extract' + '/test2015',
             },
             'gqa': {
                 'default-frcn': self.DATA_PATH['gqa'] + '/feats' + '/gqa-frcn',

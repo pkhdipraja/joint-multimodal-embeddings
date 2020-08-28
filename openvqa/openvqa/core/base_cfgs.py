@@ -74,7 +74,7 @@ class BaseCfgs(PATH):
         self.USE_GLOVE = False
 
         # Set True to use pretrained BERT embeddings
-        self.USE_BERT = not self.USE_GLOVE
+        self.USE_BERT = False
 
         # Set True to use BERT as encoder to replace question LSTM encoder
         self.BERT_ENCODER = False
