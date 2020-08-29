@@ -8,7 +8,7 @@ import glob, json, re, en_vectors_web_lg
 from openvqa.core.base_dataset import BaseDataSet
 from openvqa.utils.ans_punct import prep_ans
 from transformers import BertTokenizerFast
-import torch
+import torch, time
 
 class DataSet(BaseDataSet):
     def __init__(self, __C):
@@ -71,8 +71,16 @@ class DataSet(BaseDataSet):
         self.tokenizer = BertTokenizerFast.from_pretrained(self.__C.BERT_VER, do_lower_case=True) if self.__C.USE_BERT else None
 
         # {image id} -> {image feature absolutely path}
-        self.iid_to_frcn_feat_path = self.img_feat_path_load(frcn_feat_path_list)
-        self.iid_to_grid_feat_path = self.img_feat_path_load(grid_feat_path_list)
+        if self.__C.PRELOAD:
+            print('==== Pre-Loading features ...')
+            time_start = time.time()
+            self.iid_to_frcn_feat = self.img_feat_load(frcn_feat_path_list)
+            # self.iid_to_grid_feat = self.img_feat_load(grid_feat_path_list)
+            time_end = time.time()
+            print('==== Finished in {}s'.format(int(time_end-time_start)))
+        else:
+            self.iid_to_frcn_feat_path = self.img_feat_path_load(frcn_feat_path_list)
+            self.iid_to_grid_feat_path = self.img_feat_path_load(grid_feat_path_list)
 
         # Loading dict: question dict -> question list
         self.qid_list = list(self.ques_dict.keys())
@@ -104,6 +112,18 @@ class DataSet(BaseDataSet):
             iid_to_path[iid] = path
 
         return iid_to_path
+
+    def img_feat_load(self, path_list):
+        iid_to_feat = {}
+
+        for ix, path in enumerate(path_list):
+            iid = path.split('/')[-1].split('.')[0]
+            img_feat = np.load(path)
+            img_feat_x = img_feat['x']
+            iid_to_feat[iid] = img_feat_x
+            print('\rPre-Loading: [{} | {}] '.format(ix, path_list.__len__()), end='          ')
+        
+        return iid_to_feat
 
 
     # def tokenize(self, stat_ques_dict, use_glove):
@@ -205,11 +225,17 @@ class DataSet(BaseDataSet):
 
 
     def load_img_feats(self, idx, iid):
-        frcn_feat = np.load(self.iid_to_frcn_feat_path[iid])
-        frcn_feat_iter = self.proc_img_feat(frcn_feat['x'], img_feat_pad_size=self.__C.FEAT_SIZE['gqa']['FRCN_FEAT_SIZE'][0])
-
-        # grid_feat = np.load(self.iid_to_grid_feat_path[iid])
-        # grid_feat_iter = grid_feat['x']
+        if self.__C.PRELOAD:
+            frcn_feat_x = self.iid_to_frcn_feat[iid]
+            # grid_feat_iter = self.iid_to_grid_feat[iid]
+        else:
+            frcn_feat = np.load(self.iid_to_frcn_feat_path[iid])
+            frcn_feat_x = frcn_feat['x']
+            # grid_feat = np.load(self.iid_to_grid_feat_path[iid])
+            # grid_feat_iter = grid_feat['x']
+        frcn_feat_iter = self.proc_img_feat(frcn_feat_x, img_feat_pad_size=self.__C.FEAT_SIZE['gqa']['FRCN_FEAT_SIZE'][0])
+        
+        
 
         # bbox_feat_iter = self.proc_img_feat(
         #     self.proc_bbox_feat(

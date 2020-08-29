@@ -81,6 +81,10 @@ class BaseCfgs(PATH):
         
         # BERT Version
         self.BERT_VER = 'bert-base-uncased'
+
+        # Pre-load the features into memory to increase the I/O speed
+        self.PRELOAD = False
+        
         # Word embedding matrix size
         # (token size x WORD_EMBED_SIZE)
         self.WORD_EMBED_SIZE = 300

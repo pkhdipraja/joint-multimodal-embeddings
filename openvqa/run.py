@@ -138,6 +138,11 @@ def parse_args():
                       help='True: verbose print, False: simple print',
                       type=str)
 
+    parser.add_argument('--PRELOAD', dest='PRELOAD',
+                      help='pre-load the features into memory'
+                           'to increase the I/O speed',
+                      type=bool)
+
 
     args = parser.parse_args()
     return args
