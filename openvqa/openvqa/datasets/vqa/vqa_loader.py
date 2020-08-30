@@ -62,7 +62,14 @@ class DataSet(BaseDataSet):
         self.tokenizer = BertTokenizerFast.from_pretrained(self.__C.BERT_VER, do_lower_case=True) if self.__C.USE_BERT else None
         
         # {image id} -> {image feature absolutely path}
-        self.iid_to_frcn_feat_path = self.img_feat_path_load(frcn_feat_path_list)
+        if self.__C.PRELOAD:
+            print('==== Pre-Loading features ...')
+            time_start = time.time()
+            self.iid_to_frcn_feat = self.img_feat_load(frcn_feat_path_list)
+            time_end = time.time()
+            print('==== Finished in {}s'.format(int(time_end-time_start)))
+        else:
+            self.iid_to_frcn_feat_path = self.img_feat_path_load(frcn_feat_path_list)
 
         # {question id} -> {question}
         self.qid_to_ques = self.ques_load(self.ques_list)
@@ -91,6 +98,19 @@ class DataSet(BaseDataSet):
             iid_to_path[iid] = path
 
         return iid_to_path
+    
+
+    def img_feat_load(self, path_list):
+        iid_to_feat = {}
+
+        for ix, path in enumerate(path_list):
+            iid = str(int(path.split('/')[-1].split('_')[-1].split('.')[0]))
+            img_feat = np.load(path)
+            img_feat_x = img_feat['x'].transpose((1, 0))
+            iid_to_feat[iid] = img_feat_x
+            print('\rPre-Loading: [{} | {}] '.format(ix, path_list.__len__()), end='          ')
+        
+        return iid_to_feat
 
 
     def ques_load(self, ques_list):
@@ -214,8 +234,11 @@ class DataSet(BaseDataSet):
 
 
     def load_img_feats(self, idx, iid):
-        frcn_feat = np.load(self.iid_to_frcn_feat_path[iid])
-        frcn_feat_x = frcn_feat['x'].transpose((1, 0))
+        if self.__C.PRELOAD:
+            frcn_feat_x = self.iid_to_frcn_feat[iid]
+        else:
+            frcn_feat = np.load(self.iid_to_frcn_feat_path[iid])
+            frcn_feat_x = frcn_feat['x'].transpose((1, 0))
         frcn_feat_iter = self.proc_img_feat(frcn_feat_x, img_feat_pad_size=self.__C.FEAT_SIZE['vqa']['FRCN_FEAT_SIZE'][0])
 
         bbox_feat_iter = self.proc_img_feat(

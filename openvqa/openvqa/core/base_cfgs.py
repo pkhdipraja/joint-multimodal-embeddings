@@ -58,7 +58,7 @@ class BaseCfgs(PATH):
 
         # Set True to evaluate offline when an epoch finished
         # (only work when train with 'train' split)
-        self.EVAL_EVERY_EPOCH = True
+        self.EVAL_EVERY_EPOCH = False
 
         # Set True to save the prediction vector
         # (use in ensemble)
