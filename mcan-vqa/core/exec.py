@@ -10,12 +10,14 @@ from core.model.optim import get_optim, adjust_lr
 from core.data.data_utils import shuffle_list
 from utils.vqa import VQA
 from utils.vqaEval import VQAEval
+#from torch.utils.tensorboard import SummaryWriter
 
 import os, json, torch, datetime, pickle, copy, shutil, time
 import numpy as np
 import torch.nn as nn
 import torch.utils.data as Data
 
+from torchsummary import summary ###
 
 class Execution:
     def __init__(self, __C):
@@ -39,7 +41,10 @@ class Execution:
         data_size = dataset.data_size
         token_size = dataset.token_size
         ans_size = dataset.ans_size
-        # pretrained_emb = dataset.pretrained_emb
+        pretrained_emb = dataset.pretrained_emb
+
+        # Tensorboard
+ #       writer = SummaryWriter('/cache/tensorboard-logdir/' + self.__C.CKPT_VERSION)
 
         # Define the MCAN model
         net = Net(
@@ -148,7 +153,6 @@ class Execution:
             for step, (
                     img_feat_iter,
                     ques_ix_iter,
-                    att_mask_iter,
                     ans_iter
             ) in enumerate(dataloader):
 
@@ -156,7 +160,6 @@ class Execution:
 
                 img_feat_iter = img_feat_iter.cuda()
                 ques_ix_iter = ques_ix_iter.cuda()
-                att_mask_iter = att_mask_iter.cuda()
                 ans_iter = ans_iter.cuda()
 
                 for accu_step in range(self.__C.GRAD_ACCU_STEPS):
@@ -166,9 +169,6 @@ class Execution:
                                       (accu_step + 1) * self.__C.SUB_BATCH_SIZE]
                     sub_ques_ix_iter = \
                         ques_ix_iter[accu_step * self.__C.SUB_BATCH_SIZE:
-                                     (accu_step + 1) * self.__C.SUB_BATCH_SIZE]
-                    sub_att_mask_iter = \
-                        att_mask_iter[accu_step * self.__C.SUB_BATCH_SIZE:
                                      (accu_step + 1) * self.__C.SUB_BATCH_SIZE]
                     sub_ans_iter = \
                         ans_iter[accu_step * self.__C.SUB_BATCH_SIZE:
@@ -202,6 +202,12 @@ class Execution:
                             loss.cpu().data.numpy() / self.__C.SUB_BATCH_SIZE,
                             optim._rate
                         ), end='          ')
+
+ #               if step % 1000 == 999:  # for every 1000 minibatches log the running loss
+ #                   writer.add_scalar('training loss',
+ #                                     loss_sum / 1000,
+ #                                     epoch * len(dataloader) + step
+ #                   )
 
                 # Gradient norm clipping
                 if self.__C.GRAD_NORM_CLIP > 0:
@@ -323,7 +329,7 @@ class Execution:
             token_size,
             ans_size
         )
-        net.cuda()
+        net.cuda()      
         net.eval()
 
         if self.__C.N_GPU > 1:
@@ -389,7 +395,8 @@ class Execution:
             'answer': dataset.ix_to_ans[str(ans_ix_list[qix])],  # ix_to_ans(load with json) keys are type of string
             'question_id': int(qid_list[qix])
         }for qix in range(qid_list.__len__())]
-
+        
+       
         # Write the results to result file
         if valid:
             if val_ckpt_flag:

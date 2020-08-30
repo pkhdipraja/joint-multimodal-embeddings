@@ -65,21 +65,22 @@ class Net(nn.Module):
 
         if __C.BERT_ENCODER:
             self.bert_encode = True
-            self.encoder = BertModel.from_pretrained('bert-base-uncased')
+            self.encoder = BertModel.from_pretrained('bert-large-uncased')
         else:
             self.bert_encode = False
-            self.embedding = nn.Embedding(
-                num_embeddings=token_size,
-                embedding_dim=__C.WORD_EMBED_SIZE
-            )
+            self.bert_layer = BertModel.from_pretrained('bert-large-uncased') ###
+            # freeze BERT layers
+            for p in self.bert_layer.parameters():
+                p.requires_grad = False
+       #     self.embedding = nn.Embedding(
+        #        num_embeddings=token_size,
+         #       embedding_dim=__C.WORD_EMBED_SIZE
+          #  )
 
 
         # Loading the GloVe embedding weights 
         # if __C.USE_GLOVE:
         #     self.embedding.weight.data.copy_(torch.from_numpy(pretrained_emb))
-
-        if __C.USE_BERT:
-            self.embedding.weight.data.copy_(torch.from_numpy(pretrained_emb))
         
         self.lstm = nn.LSTM(
             input_size=__C.WORD_EMBED_SIZE,
@@ -114,8 +115,10 @@ class Net(nn.Module):
             lang_feat = last_hidden_state[:, 1:-1, :]  # remove CLS and SEP, making this to MAX_TOKEN = 14
         else:
             # Pre-process Language Feature
-            lang_feat = self.embedding(ques_ix)
-            lang_feat, _ = self.lstm(lang_feat)
+            outputs = self.bert_layer(ques_ix) ###
+            last_hidden_state = outputs[0] ###
+            last_reshape = last_hidden_state[:, 1:-1, :] ###
+            lang_feat, _ = self.lstm(last_reshape) ###
 
         # Pre-process Image Feature
         img_feat = self.img_feat_linear(img_feat)

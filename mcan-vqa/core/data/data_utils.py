@@ -72,49 +72,29 @@ def tokenize(stat_ques_list, tokenizer, model, max_token, encoder_flag=False):
             
             pretrained_emb = None  # cannot use a fixed CWR as BERT is fine-tuned during training
 
-    else:  # when using frozen BERT embeddings
+    else: # when using frozen BERT embeddings
         token_to_ix = {}
 
+        ques_size = len(stat_ques_list)
+        count_ques = 0
+        
         for ques in stat_ques_list:
             words = re.sub(
                 r"([.,'!?\"()*#:;])",
                 '',
-                ques['question']
+                ques['question'].lower()
             ).replace('-', ' ').replace('/', ' ')
-            encoded_ques = tokenizer.encode_plus(
-                            words,
-                            add_special_tokens=True,
-                            max_length=max_token,
-                            pad_to_max_length=True,
-                            return_tensors='pt',
-                        )  
-            indexed_tokens = tokenizer.convert_tokens_to_ids(encoded_ques)
-            tokens_tensor = torch.tensor([indexed_tokens])
             
-            # feed-forward operation
-            model.eval()
-            with torch.no_grad():
-                outputs = model(tokens_tensor)
-                hidden_states = outputs[2]
-                # Concatenate the tensors for all layers.
-                token_embeddings = torch.stack(hidden_states, dim=0)
-                token_embeddings = torch.squeeze(token_embeddings, dim=1)
-                token_embeddings = token_embeddings.permute(1, 0, 2)
-            
-                pretrained_emb = []
-                
-                for token in token_embeddings:
-                    sum_vec = torch.sum(token[-4:],dim=0)
-                    pretrained_emb.append(sum_vec)
-                
-            pretrained_emb = torch.stack(pretrained_emb)
-            pretrained_emb = pretrained_emb.numpy()
-        
             words = tokenizer.tokenize(words)
-            for word in words:
-                if word not in token_to_ix:
-                    token_to_ix[word] = len(token_to_ix)
+            ids = tokenizer.convert_tokens_to_ids(words)
+                          
+            for tup in zip(words, ids):
+                if tup[0] not in token_to_ix:
+                    token_to_ix[tup[0]] = len(token_to_ix)
 
+            pretrained_emb = None 
+          
+            
     return token_to_ix, pretrained_emb
 
 
@@ -185,7 +165,6 @@ def proc_ques(ques, token_to_ix, max_token, tokenizer):
     ques_ix = torch.squeeze(ques_ix)
 
     return ques_ix
-
 
 def get_score(occur):
     if occur == 0:
