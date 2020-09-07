@@ -510,7 +510,7 @@ def LoadDatasets(args, task_cfg, ids, split="trainval"):
                 task_datasets_val[task],
                 shuffle=False,
                 batch_size=batch_size,
-                num_workers=2,
+                num_workers=0,
                 pin_memory=True,
             )
 
@@ -599,7 +599,7 @@ def LoadDatasetEval(args, task_cfg, ids):
             task_datasets_val[task],
             shuffle=False,
             batch_size=batch_size,
-            num_workers=10,
+            num_workers=0,
             pin_memory=True,
         )
 
@@ -634,6 +634,7 @@ def EvaluatingModel(
     task_losses,
     results,
     others,
+    orig_ques_idx
 ):
     batch = tuple(t.cuda(device=device, non_blocking=True) for t in batch)
 
@@ -642,7 +643,7 @@ def EvaluatingModel(
             batch
         )
     else:
-        features, spatials, image_mask, question, target, input_mask, segment_ids, co_attention_mask, question_id = (
+        features, spatials, image_mask, question, target, input_mask, segment_ids, co_attention_mask, question_id, boxes = (
             batch
         )
     batch_size = features.size(0)
@@ -763,7 +764,7 @@ def EvaluatingModel(
     task_tokens = question.new().resize_(question.size(0), 1).fill_(int(task_id[4:]))
 
     with torch.no_grad():
-        vil_prediction, vil_prediction_gqa, vil_logit, vil_binary_prediction, vil_tri_prediction, vision_prediction, vision_logit, linguisic_prediction, linguisic_logit, _ = model(
+        vil_prediction, vil_prediction_gqa, vil_logit, vil_binary_prediction, vil_tri_prediction, vision_prediction, vision_logit, linguisic_prediction, linguisic_logit, att_score = model(
             question,
             features,
             spatials,
@@ -772,6 +773,7 @@ def EvaluatingModel(
             image_mask,
             co_attention_mask,
             task_tokens,
+            output_all_attention_masks=True
         )
 
     if task_cfg[task_id]["type"] == "VL-classifier":
@@ -792,13 +794,32 @@ def EvaluatingModel(
         logits = torch.max(vil_prediction_gqa, 1)[1].data
         loss = 0
         batch_score = 0
+
+        # Currently attention extraction only works for batch size=1
+        #print(type(boxes))
+        #print(boxes.size())
+        #print(len(att_score))
+        #print("type", att_score[1][-1]['attn'].size())
+        #print(att_score[1][-1]['attn'][:,1,1,:].size())
+        
+        attention = []
+        bboxes = torch.squeeze(boxes)[:,:4]
+        #print(bboxes[3,:].tolist())
+        last_layer_att_score = torch.squeeze(att_score[1][-1]['attn'][:, 7, 0, :]) # batch_size, att_head, target_num_feat, source_num_feat -> use att head 1 and CLS as target
+
+        for num_bbox in range(bboxes.shape[0]):
+            bbox_info = bboxes[num_bbox, :].tolist()
+            bbox_info.append(last_layer_att_score[num_bbox].item())
+            attention.append(bbox_info)
+
         for i in range(logits.size(0)):
             results.append(
                 {
-                    "questionId": str(question_id[i].item()),
+                    "questionId": str(task_dataloader[task_id].dataset.qid_list[orig_ques_idx]),
                     "prediction": task_dataloader[task_id].dataset.label2ans[
                         logits[i].item()
                     ],
+                    "attention": attention 
                 }
             )
 

@@ -29,6 +29,7 @@ def _create_entry(item):
         "image_id": item["image_id"],
         "question": item["question"],
         "answer": item,
+        "orig_question_id": item["question_id"],
     }
     return entry
 
@@ -143,6 +144,9 @@ class GQAClassificationDataset(Dataset):
             logger.info("Loading from %s" % cache_path)
             self.entries = cPickle.load(open(cache_path, "rb"))
 
+        # Create list to original question ID
+        self.qid_list = [entry["orig_question_id"] for entry in self.entries]
+
     def tokenize(self, max_length=16):
         """Tokenizes the questions.
 
@@ -247,6 +251,7 @@ class GQAClassificationDataset(Dataset):
             segment_ids,
             co_attention_mask,
             question_id,
+            boxes
         )
 
     def __len__(self):
