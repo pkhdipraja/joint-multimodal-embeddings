@@ -4,8 +4,8 @@ TASK1:
   loss: BCEWithLogitLoss
   process: normal
   task_id: 1
-  dataroot: datasets/VQA/
-  features_h5path1: datasets/coco/features_100/COCO_trainval_resnext152_faster_rcnn_genome.lmdb
+  dataroot: /home/users/pkahardipraja/project/joint_reps/vilbert-multi-task/data/datasets/VQA/
+  features_h5path1: /home/users/pkahardipraja/project/joint_reps/vilbert-multi-task/data/datasets/coco/features_100/COCO_test_resnext152_faster_rcnn_genome.lmdb
   features_h5path2: ''
   train_annotations_jsonpath: ''
   val_annotations_jsonpath: ''
@@ -14,7 +14,7 @@ TASK1:
   batch_size: 128
   eval_batch_size: 1024
   train_split: trainval
-  val_split: minval
+  val_split: test
   lr: 0.00004
   num_epoch: 20
 TASK2:
@@ -263,17 +263,17 @@ TASK15:
   loss: BCEWithLogitLoss
   process: normal
   task_id: 15
-  dataroot: datasets/gqa/
-  features_h5path1: datasets/gqa/gqa_resnext152_faster_rcnn_genome.lmdb
+  dataroot: /home/users/pkahardipraja/project/joint_reps/vilbert-multi-task/data/datasets/gqa/
+  features_h5path1: /home/users/pkahardipraja/project/joint_reps/vilbert-multi-task/data/datasets/gqa/gqa_resnext152_faster_rcnn_genome.lmdb
   features_h5path2: ''
   train_annotations_jsonpath: ''
   val_annotations_jsonpath: ''
   max_seq_length: 26
   max_region_num: 101
-  batch_size: 128
+  batch_size: 32
   eval_batch_size: 1024
   train_split: trainval
-  val_split: minval
+  val_split: val
   lr: 0.00004
   num_epoch: 20
 TASK16:

@@ -11,7 +11,7 @@ import random
 from io import open
 import numpy as np
 
-from tensorboardX import SummaryWriter
+#from tensorboardX import SummaryWriter
 from tqdm import tqdm
 from bisect import bisect
 import yaml
@@ -148,7 +148,7 @@ def main():
     parser.add_argument(
         "--num_workers",
         type=int,
-        default=16,
+        default=0,
         help="Number of workers in the dataloader.",
     )
     parser.add_argument(
@@ -487,17 +487,17 @@ def main():
             if torch.is_tensor(v):
                 state[k] = v.cuda()
 
-    if args.local_rank != -1:
-        try:
-            from apex.parallel import DistributedDataParallel as DDP
-        except ImportError:
-            raise ImportError(
-                "Please install apex from https://www.github.com/nvidia/apex to use distributed and fp16 training."
-            )
-        model = DDP(model, delay_allreduce=True)
-
-    elif n_gpu > 1:
-        model = torch.nn.DataParallel(model)
+#    if args.local_rank != -1:
+#        try:
+#            from apex.parallel import DistributedDataParallel as DDP
+#        except ImportError:
+#            raise ImportError(
+#                "Please install apex from https://www.github.com/nvidia/apex to use distributed and fp16 training."
+#            )
+#        model = DDP(model, delay_allreduce=True)
+#
+#    elif n_gpu > 1:
+#        model = torch.nn.DataParallel(model)
 
     if default_gpu:
         print("***** Running training *****")
