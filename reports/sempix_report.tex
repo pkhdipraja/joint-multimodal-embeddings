@@ -1,0 +1,160 @@
+\documentclass{article}
+
+% if you need to pass options to natbib, use, e.g.:
+%     \PassOptionsToPackage{numbers, compress}{natbib}
+% before loading neurips_2020
+
+\usepackage{natbib}
+\bibliographystyle{abbrvnat}
+\setcitestyle{authoryear,open={(},close={)}}
+
+% commands for comments
+\usepackage[dvipsnames]{xcolor}
+\newcommand{\todo}[1]{\textbf{\textcolor{Red}{(TODO: #1)}}}
+
+% ready for submission
+%\usepackage{neurips_2020}
+
+% to compile a preprint version, e.g., for submission to arXiv, add add the
+% [preprint] option:
+    \usepackage[preprint]{neurips_2020}
+
+% to compile a camera-ready version, add the [final] option, e.g.:
+%  \usepackage[final]{neurips_2020}
+
+% to avoid loading the natbib package, add option nonatbib:
+%     \usepackage[nonatbib]{neurips_2020}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage[colorlinks,citecolor=blue]{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+
+\title{Joint Multimodal Embeddings}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to LaTeX to determine where to break the
+% lines. Using \AND forces a line break at that point. So, if LaTeX puts 3 of 4
+% authors names on the first line, and the last on the second line, try using
+% \AND instead of \And before the third author name.
+
+\author{%
+   Patrick Kahardipraja%\thanks{Use footnote for providing further information
+    %about author (webpage, alternative address)---\emph{not} for acknowledging
+    %funding agencies.} \\
+  %Department of Computer Science\\
+  %Cranberry-Lemon University\\
+  %Pittsburgh, PA 15213 \\
+  %\texttt{hippo@cs.cranberry-lemon.edu} \\
+  % examples of more authors
+  \And
+   Laura Kopf \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \AND
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+  % \And
+  % Coauthor \\
+  % Affiliation \\
+  % Address \\
+  % \texttt{email} \\
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Multimodal vision and language tasks such as visual question answering (VQA) are challenging, because they require both the understanding of image content and natural language. To solve multimodal problems it is crucial to represent data in a meaningful way. One way to do this/common approach is to project joint representations to the same space using all of the modalities as input to establish inter-modal relationships. In this project we will investigate whether joint representations derived from pre-trained models are better compared to the joint representations learned from a task-specific model. In an effort to answer this question, we will compare the pre-trained and multi-task Vision-and-Language BERT (ViLBERT) \citep{lu2019vilbert, lu2020multitask} models to the task-specific deep Modular Co-Attention Network (MCAN) \citep{yu2019mcan} on a VQA task and evaluate grounding. Our experimental results demonstrate that \todo{give short summary of our results}. Our code is (publicly) available at \todo{insert URL}.
+\end{abstract}
+
+\section{Introduction}
+
+In recent years there have been significant advancements in several language and vision tasks such as image-text retrieval \citep{wang2015retrieval}, visual commonsense reasoning \citep{zellers2018vcr}, visual entailment \citep{xie2019entailment} and visual question answering \citep{antol2015vqa, malinowski2014vqa, kim2018vqa, zhao2018vqa}. In its most common form, the VQA task requires an algorithm to provide the correct answer for a natural language question asked about an input image. Solving the VQA task stands out as particularly challenging, because it also involves solving many subtasks like object detection, activity recognition, knowledge base reasoning, and commonsense reasoning. 
+
+\todo{find better transition}
+A variety of models have been developed to solve this task, using different methods such as stacked attention networks \citep{yang2016vqa}, bottom-up and top-down attention mechanism \citep{anderson2017vqa}, and compositional attention networks \citep{hudson2018mac} to name a few. In our project we will compare two attention-based models that have different approaches to solving the VQA problem: MCAN and ViLBERT.
+
+MCAN consists of Modular Co-Attention (MCA) layers cascaded in depth. Each layer is composed of two basic attention units, self-attention of questions and images, as well as the guided-attention of images. The input question is transformed into GloVe word embeddings and subsequently passed through a one layer LSTM network. In the multimodal fusion textual and image representations are jointly embedded into the same space and fed into a classifier which predicts the final answer.
+
+ViLBERT is fairly similar to the MCAN architecture, but in contrast is not task specific. In our project we will refer to two ViLBERT models. The first being the ViLBERT model pretrained on the Conceptual Captions dataset originally proposed by \cite{lu2019vilbert}, and the second one being the multi-task ViLBERT model recently introduced by \cite{lu2020multitask}. ViLBERT is a pre-trained model that is extending the BERT language model to jointly represent images and text. It processes visual and textual inputs in separate streams that interact through co-attentional transformer layers. The pre-trained model is then put to four vision-and-language tasks: visual question answering, visual commonsense reasoning, referring expressions, and caption-based image retrieval. Multi-task ViLBERT has a similar architecture, but it is trained jointly on 12 datasets on the same four categories of tasks as previously mentioned. \cite{lu2020multitask} argue that joint training can improve the performance compared to single-task training with the same architecture. \todo{add specific reason why we also include multi-task ViLBERT}
+
+In comparison to MCAN, only one modality can be used to guide another modality while ViLBERT allows both modalities to exchange information simultaneously. Another difference lies in the fusing method the architectures use. MCAN learns to project textual and image representations to a shared space, while ViLBERT applies an element-wise product between visual and linguistic representations.
+
+It still remains unclear to which extent the models that solve the VQA task understood the visual-language concepts. \cite{agrawal12018gvqa} argue that VQA models are heavily driven by superficial correlations in the training data and lack sufficient image grounding. To gain an insight into what the models are learning, we focus on whether the models are able to ground questions accurately. The GQA dataset \citep{hudson2019gqa} seeks to address the shortcomings of previous VQA datasets and also includes a metric to evaluate grounding.
+
+Our project aims to examine the question whether representations derived from pre-trained models such es ViLBERT are actually better compared to representations learned from a task-specific model such as MCAN. In order to better understand the characteristics of the more successful network architecture we apply both to a VQA task. We build our experimental setup on two pre-existing models and will conduct two modifications to the MCAN. One method will be to replace GloVe as embedding with BERT, and the second method will be to replace the LSTM question encoder with a BERT encoder. We finetune both methods and analyze how this affects the model’s performance. We train and evaluate the modified MCAN architectures on the benchmark VQA-v2 dataset \citep{goyal2016vqa2} and and compare it to the results of both to the results of the original MCAN architecture and ViLBERT. In order to evaluate grounding we will evaluate the MCAN architectures on GQA and compare these results to ViLBERT based on multi-task learning on GQA \citep{lu2020multitask}. \todo{Give short preview of our results. Add missing steps in our experimantal setup/evaluation method}
+\todo{General note: revise Introduction according to our report: add/shorten paragraphs where needed}
+
+\section{Related Work}
+
+mcan\citep{yu2019mcan}
+
+vilbert\citeauthor{lu2019vilbert}
+
+\subsection{Advances in Multimodal Embeddings}
+%bilinear?
+
+\subsection{Grounding}
+
+\subsection{Visual Question Answering}
+
+\subsection{Modular Co-Attention Network (MCAN)}
+% explain SA & GA, MCA
+%inter-modal, intra-modal and dense interaction modeling
+% inspiration of co-attention?
+In VQA, extracting discriminative features for textual and image representations are important in order to obtain fine-grained semantic understanding of both the image and the question. However, using global features extracted from the whole image to represent visual information may introduce noisy information that are irrelevant to the question (e.g. the case where only a small region of the image that relates to a question). On the other side, natural language questions may also contain words that are not relevant to the image and therefore can be also considered as noise. This leads to co-attention learning approach to jointly learn the attentions for both the image and the question simultaneously, which allows the model to extract more discriminative visual and textual representations. 
+
+Several methods have been proposed for co-attention learning in VQA. \citet{yu2018beyond} separated the co-attention method into two steps, self-attention for question attention and visual attention conditioned on attended question representation. In their approach, multiple attention maps can also be used to improve the capacity of the attended visual representation, where it is fused at a later stage with the attended question representation through multi-modal factorized high-order pooling (MFH). \citet{Nguyen_2018_CVPR} proposed dense co-attention network (DCN) which establish bi-directional interactions between textual and visual modalities by generating attention map on question words for each image region and vice versa. \citet{ban} introduced bilinear attention networks (BAN), where bilinear attention map is used to reduce the computational cost to learn attention distribution for every pair of question words and image regions. They also used low-rank bilinear pooling to produce joint question and image representation. However MFH lacks dense interaction modeling between questions and images. DCN and BAN also do not model intra-modal attention.
+
+To address the aforementioned problems, \citet{yu2019mcan} proposed modular co-attention network (MCAN), which simultaneously models dense intra- and inter- modal interactions. MCAN is composed of stacked modular co-attention (MCA) layer which consists of the self-attention (SA) and the guided-attention (GA) unit based on scaled dot-product attention \citep{transformers}. The SA unit consists of multi-head attention layer and feed-forward neural network (FFNN) layer. It accepts group of input features $X = [x_{1}, \dots, x_{m}]$ where $m$ is number of features and pass it through the multi-head attention module to learn pairwise relationship between every possible pairing $\langle x_{i},x_{j} \rangle$ in $X$ to obtain attended output features $Z$ using weighted summation of $X$. The output of the multi-head attention layer $Z$ is then feeded through two fully-connected layers with ReLU activation \citep{relu} and dropout units \citep{dropout}. A residual connection \citep{residual} is employed around each of the two layers, followed by layer normalization \citep{ba2016layer} to improve optimization.
+
+The GA unit is almost similar to the SA unit. It is composed of multi-head attention and FFNN layer. The GA unit accepts two group of input features $X$ and $Y = [y_{1}, \dots, y_{n}]$ where $n$ is number of features for another modality (i.e. if $X$ is a question embedding, $Y$ should be an image embedding and vice versa). The GA unit learn to model pairwise relationship between every possible pairing $\langle x_{i},y_{j} \rangle$ from $X$ and $Y$. The output $Z$ for GA unit can be understood as attended features for $X$ guided by $Y$. In order to guide the attention learning, for GA unit key and value matrices for multi-head attention are computed with respect to $Y$, while queries are computed with respect to $X$. 
+
+In a sense, the attended output feature $z_{i} \in Z$ can be seen as reconstruction of $x_{i} \in X$: 1) by all $x \in X$ with respect to their normalized intra-modal similarities to $x_{i}$ for the SA unit and 2) by all $y \in Y$ with respect to their normalized cross-modal similarity to $x_{i}$ for the GA unit. Both SA and GA unit can be modularly combined to obtain various configurations. For instance, 2 SA units can be used to model the dense intra-modal interaction between each question word pairs and each image region pairs separately. Afterwards, the attended visual and question features are fed to a GA unit to model dense inter-modal interactions between each word with each image region. 
+
+In this model, a single-layer LSTM encoder \citep{lstm} is used to compute question representations from GloVe embeddings \citep{pennington2014glove}. Instead of using only the last hidden state of LSTM encoder, MCAN utilises the hidden states for all time steps as question embedding, yielding feature matrix $I \in \mathbb{R}^{n \times d_{i}}$ where $n$ is the number of words in the question and $d_{i}$ is the size of LSTM hidden units. For image representation, a set of regional visual features in a bottom-up manner \citep{Anderson_2018_CVPR} are extracted from a Faster R-CNN \citep{faster_rcnn} with ResNet-101 backbone. Each $k$-th object is represented as $d_{j}$-dimensional feature vector by mean-pooling the convolutional feature from its detected region, resulting in image feature matrix $J \in \mathbb{R}^{m \times d_{j}}$ where $m$ is the number of detected objects.
+
+There are two variants of deep co-attention models using the MCA layer: \textit{stacking} and \textit{encoder-decoder}. In \textit{stacking} model, $L$ MCA layers are stacked in depth with $Z_{I}^{(L)}$ and $Z_{Q}^{(L)}$ as the final attended image and question features respectively. On the other side, \textit{encoder-decoder} model is derived from Transformer architecture \citep{transformers}. Instead of using $Y^{(l)}$ as input features to guide the attention learning of the GA unit for each $l$-th layer of MCA, only the question features from the last MCA layer $Y^{(L)}$ is utilised. This can be seen as 
+
+\subsection{Vision-and-Language BERT (ViLBERT)}
+% also discuss uniter, vl-bert, lxmert, etc? change section name?
+
+\section{Approach}
+%also explain rationale why to choose both models and differences between them
+\subsection{Applying BERT}
+
+\section{Experimental Setup}
+
+\subsection{Datasets}
+%VQA, image from MSCoco, GQA: statistics for training, included annotation
+
+\subsection{Implementation and Hyperparameters}
+
+\subsection{Baseline Model}
+%mcan enc-dec
+
+\subsection{Grounding}
+
+\section{Results and Discussion}
+%vqa result, gqa result, grounding (possibly with all attention heads with vilbert), ablation of fusion method, transfer performance, attention visualization(?), qualitative analysis of cases where model fails?
+\section{Conclusion and Future Work}
+
+\bibliography{sempix}
+
+\end{document}
