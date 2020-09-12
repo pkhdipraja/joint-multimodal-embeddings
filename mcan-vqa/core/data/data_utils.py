@@ -9,7 +9,6 @@ import numpy as np
 import random, re, json
 #import en_vectors_web_lg, random, re, json
 import torch
-from transformers import BertModel
 
 
 def shuffle_list(ans_list):
@@ -53,7 +52,7 @@ def ques_load(ques_list):
     return qid_to_ques
 
 
-def tokenize(stat_ques_list, tokenizer, encoder_flag=False, model):
+def tokenize(stat_ques_list, tokenizer, model, max_token, encoder_flag=False):
     if encoder_flag:
         token_to_ix = {}  # only for statistic!!
 
@@ -73,14 +72,12 @@ def tokenize(stat_ques_list, tokenizer, encoder_flag=False, model):
             
             pretrained_emb = None  # cannot use a fixed CWR as BERT is fine-tuned during training
 
-    else:  # when using frozen BERT embeddings
-        token_to_ix = {
-            'PAD': 0,
-            'UNK': 1,
-            '[CLS]': 2,
-            '[SEP]': 3,      
-        }
+    else: # when using frozen BERT embeddings
+        token_to_ix = {}
 
+        ques_size = len(stat_ques_list)
+        count_ques = 0
+        
         for ques in stat_ques_list:
             words = re.sub(
                 r"([.,'!?\"()*#:;])",
@@ -88,37 +85,16 @@ def tokenize(stat_ques_list, tokenizer, encoder_flag=False, model):
                 ques['question'].lower()
             ).replace('-', ' ').replace('/', ' ')
             
-            marked_ques = "[CLS] " + words + " [SEP]"
-            tokenized_ques = tokenizer.tokenize(marked_ques)
-            indexed_tokens = tokenizer.convert_tokens_to_ids(tokenized_ques)
-            segments_ids = [1] * len(tokenized_ques)  
-            tokens_tensor = torch.tensor([indexed_tokens])
-            segments_tensors = torch.tensor([segments_ids])
+            words = tokenizer.tokenize(words)
+            ids = tokenizer.convert_tokens_to_ids(words)
+                          
+            for tup in zip(words, ids):
+                if tup[0] not in token_to_ix:
+                    token_to_ix[tup[0]] = len(token_to_ix)
 
-            # feed-forward operation
-            model.eval()
-
-            with torch.no_grad():
-                outputs = model(tokens_tensor, segments_tensors)
-                hidden_states = outputs[2]
-                # Concatenate the tensors for all layers.
-                token_embeddings = torch.stack(hidden_states, dim=0)
-                token_embeddings = torch.squeeze(token_embeddings, dim=1)
-                token_embeddings = token_embeddings.permute(1, 0, 2)
-
-                pretrained_emb = []
-                
-                for token in token_embeddings:
-                    sum_vec = torch.sum(token[-4:],dim=0) # sum up last 4 layers
-                    pretrained_emb.append(sum_vec)
-
-            pretrained_emb = torch.stack(pretrained_emb)
-            pretrained_emb = pretrained_emb.numpy()
-
-            for word in tokenized_ques:
-                if word not in token_to_ix:
-                    token_to_ix[word] = len(token_to_ix)
-
+            pretrained_emb = None 
+          
+            
     return token_to_ix, pretrained_emb
 
 
@@ -189,7 +165,6 @@ def proc_ques(ques, token_to_ix, max_token, tokenizer):
     ques_ix = torch.squeeze(ques_ix)
 
     return ques_ix
-
 
 def get_score(occur):
     if occur == 0:
