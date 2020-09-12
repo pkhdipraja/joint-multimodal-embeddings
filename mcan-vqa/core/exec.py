@@ -10,13 +10,18 @@ from core.model.optim import get_optim, adjust_lr
 from core.data.data_utils import shuffle_list
 from utils.vqa import VQA
 from utils.vqaEval import VQAEval
+<<<<<<< HEAD
+#from torch.utils.tensorboard import SummaryWriter
+=======
 # from torch.utils.tensorboard import SummaryWriter
+>>>>>>> 5e04b9291a1e31244ef6d543a1c715c1713bfcf2
 
 import os, json, torch, datetime, pickle, copy, shutil, time
 import numpy as np
 import torch.nn as nn
 import torch.utils.data as Data
 
+from torchsummary import summary ###
 
 class Execution:
     def __init__(self, __C):
@@ -43,7 +48,11 @@ class Execution:
         pretrained_emb = dataset.pretrained_emb
 
         # Tensorboard
+<<<<<<< HEAD
+ #       writer = SummaryWriter('/cache/tensorboard-logdir/' + self.__C.CKPT_VERSION)
+=======
         # writer = SummaryWriter('/cache/tensorboard-logdir/' + self.__C.CKPT_VERSION)
+>>>>>>> 5e04b9291a1e31244ef6d543a1c715c1713bfcf2
 
         # Define the MCAN model
         net = Net(
@@ -201,12 +210,12 @@ class Execution:
                             loss.cpu().data.numpy() / self.__C.SUB_BATCH_SIZE,
                             optim._rate
                         ), end='          ')
+ #               if step % 1000 == 999:  # for every 1000 minibatches log the running loss
+ #                   writer.add_scalar('training loss',
+ #                                     loss_sum / 1000,
+ #                                     epoch * len(dataloader) + step
+ #                   )
 
-                # if step % 1000 == 999:  # for every 1000 minibatches log the running loss
-                #     writer.add_scalar('training loss',
-                #                       loss_sum / 1000,
-                #                       epoch * len(dataloader) + step
-                #     )
 
                 # Gradient norm clipping
                 if self.__C.GRAD_NORM_CLIP > 0:
@@ -328,7 +337,7 @@ class Execution:
             token_size,
             ans_size
         )
-        net.cuda()
+        net.cuda()      
         net.eval()
 
         if self.__C.N_GPU > 1:
@@ -394,7 +403,8 @@ class Execution:
             'answer': dataset.ix_to_ans[str(ans_ix_list[qix])],  # ix_to_ans(load with json) keys are type of string
             'question_id': int(qid_list[qix])
         }for qix in range(qid_list.__len__())]
-
+        
+       
         # Write the results to result file
         if valid:
             if val_ckpt_flag:

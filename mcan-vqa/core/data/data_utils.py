@@ -6,8 +6,10 @@
 
 from core.data.ans_punct import prep_ans
 import numpy as np
-import en_vectors_web_lg, random, re, json
+import random, re, json
+#import en_vectors_web_lg, random, re, json
 import torch
+
 
 def shuffle_list(ans_list):
     random.shuffle(ans_list)
@@ -50,7 +52,7 @@ def ques_load(ques_list):
     return qid_to_ques
 
 
-def tokenize(stat_ques_list, tokenizer, encoder_flag=False):
+def tokenize(stat_ques_list, tokenizer, model, max_token, encoder_flag=False):
     if encoder_flag:
         token_to_ix = {}  # only for statistic!!
 
@@ -70,42 +72,29 @@ def tokenize(stat_ques_list, tokenizer, encoder_flag=False):
             
             pretrained_emb = None  # cannot use a fixed CWR as BERT is fine-tuned during training
 
-    else:  # when using frozen BERT embeddings
-        token_to_ix = {
-            'PAD': 0,
-            'UNK': 1,
-            '[CLS]': 2,
-            '[SEP]': 3,      
-        }
+    else: # when using frozen BERT embeddings
+        token_to_ix = {}
 
-        spacy_tool = None
-        pretrained_emb = []
-        # if use_glove:
-            # spacy_tool = en_vectors_web_lg.load()
-            # pretrained_emb.append(spacy_tool('PAD').vector)
-            # pretrained_emb.append(spacy_tool('UNK').vector)
-            
-        if use_bert:
-            spacy_tool = en_trf_bertbaseuncased_lg.load()
-            pretrained_emb.append(spacy_tool('PAD').vector)
-            pretrained_emb.append(spacy_tool('UNK').vector)
-
+        ques_size = len(stat_ques_list)
+        count_ques = 0
+        
         for ques in stat_ques_list:
             words = re.sub(
                 r"([.,'!?\"()*#:;])",
                 '',
                 ques['question'].lower()
-            ).replace('-', ' ').replace('/', ' ').split()
+            ).replace('-', ' ').replace('/', ' ')
+            
+            words = tokenizer.tokenize(words)
+            ids = tokenizer.convert_tokens_to_ids(words)
+                          
+            for tup in zip(words, ids):
+                if tup[0] not in token_to_ix:
+                    token_to_ix[tup[0]] = len(token_to_ix)
 
-            for word in words:
-                if word not in token_to_ix:
-                    token_to_ix[word] = len(token_to_ix)
-                    # if use_glove:
-                    if use_bert:
-                        pretrained_emb.append(spacy_tool(word).vector)
-
-        pretrained_emb = np.array(pretrained_emb)
-
+            pretrained_emb = None 
+          
+            
     return token_to_ix, pretrained_emb
 
 
@@ -176,7 +165,6 @@ def proc_ques(ques, token_to_ix, max_token, tokenizer):
     ques_ix = torch.squeeze(ques_ix)
 
     return ques_ix
-
 
 def get_score(occur):
     if occur == 0:
