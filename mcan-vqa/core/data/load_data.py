@@ -80,6 +80,7 @@ class DataSet(Data.Dataset):
         self.tokenizer = BertTokenizerFast.from_pretrained('bert-large-uncased', do_lower_case=True)
         self.model = BertModel.from_pretrained('bert-large-uncased', output_hidden_states=True)
         
+
         # {image id} -> {image feature absolutely path}
         if self.__C.PRELOAD:
             print('==== Pre-Loading features ...')

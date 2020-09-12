@@ -105,7 +105,7 @@ def main():
     parser.add_argument(
         "--num_workers",
         type=int,
-        default=16,
+        default=0,
         help="Number of workers in the dataloader.",
     )
     parser.add_argument(
@@ -118,7 +118,7 @@ def main():
         help="whether use chunck for parallel training.",
     )
     parser.add_argument(
-        "--batch_size", default=30, type=int, help="what is the batch size?"
+        "--batch_size", default=1, type=int, help="what is the batch size?"
     )
     parser.add_argument(
         "--tasks", default="", type=str, help="1-2-3... training task separate by -"
@@ -140,7 +140,7 @@ def main():
     )
     parser.add_argument(
         "--clean_train_sets",
-        default=True,
+        default=False,
         type=bool,
         help="whether clean train sets for multitask data.",
     )
@@ -180,13 +180,16 @@ def main():
         name = task_cfg[task]["name"]
         task_names.append(name)
 
-    if args.task_specific_tokens:
-        config.task_specific_tokens = True
+#    if args.task_specific_tokens:
+#        config.task_specific_tokens = True
 
     # timeStamp = '-'.join(task_names) + '_' + args.config_file.split('/')[1].split('.')[0]
     timeStamp = args.from_pretrained.split("/")[-1] + "-" + args.save_name
     savePath = os.path.join(args.output_dir, timeStamp)
     config = BertConfig.from_json_file(args.config_file)
+
+    if args.task_specific_tokens:
+        config.task_specific_tokens = True
 
     if args.local_rank == -1 or args.no_cuda:
         device = torch.device(
@@ -248,6 +251,9 @@ def main():
     if args.task_specific_tokens:
         config.task_specific_tokens = True
 
+    # set visualization to true
+    config.visualization=True
+
     if args.baseline:
         model = BaseBertForVLTasks.from_pretrained(
             args.from_pretrained,
@@ -265,28 +271,29 @@ def main():
 
     task_losses = LoadLosses(args, task_cfg, args.tasks.split("-"))
     model.to(device)
-    if args.local_rank != -1:
-        try:
-            from apex.parallel import DistributedDataParallel as DDP
-        except ImportError:
-            raise ImportError(
-                "Please install apex from https://www.github.com/nvidia/apex to use distributed and fp16 training."
-            )
-        model = DDP(model, delay_allreduce=True)
-
-    elif n_gpu > 1:
-        model = nn.DataParallel(model)
+#    if args.local_rank != -1:
+#        try:
+#            from apex.parallel import DistributedDataParallel as DDP
+#        except ImportError:
+#            raise ImportError(
+#                "Please install apex from https://www.github.com/nvidia/apex to use distributed and fp16 training."
+#            )
+#        model = DDP(model, delay_allreduce=True)
+#
+#    elif n_gpu > 1:
+#        model = nn.DataParallel(model)
 
     print("***** Running evaluation *****")
     print("  Num Iters: ", task_num_iters)
     print("  Batch size: ", task_batch_size)
-
+    print(task_ids)
     model.eval()
     # when run evaluate, we run each task sequentially.
     for task_id in task_ids:
         results = []
         others = []
         for i, batch in enumerate(task_dataloader_val[task_id]):
+#            print("test1\n")
             loss, score, batch_size, results, others = EvaluatingModel(
                 args,
                 task_cfg,
@@ -298,20 +305,21 @@ def main():
                 task_losses,
                 results,
                 others,
+                i
             )
-
+#            print("test2\n")
             tbLogger.step_val(0, float(loss), float(score), task_id, batch_size, "val")
 
             sys.stdout.write("%d/%d\r" % (i, len(task_dataloader_val[task_id])))
             sys.stdout.flush()
         # save the result or evaluate the result.
         ave_score = tbLogger.showLossVal(task_id)
-
+#        print("test") 
         if args.split:
             json_path = os.path.join(savePath, args.split)
         else:
             json_path = os.path.join(savePath, task_cfg[task_id]["val_split"])
-
+        print(json_path)
         json.dump(results, open(json_path + "_result.json", "w"))
         json.dump(others, open(json_path + "_others.json", "w"))
 

@@ -66,6 +66,7 @@ class Net(nn.Module):
         if __C.BERT_ENCODER:
             self.bert_encode = True
             self.encoder = BertModel.from_pretrained('bert-large-uncased')
+
         else:
             self.bert_encode = False
             self.bert = BertModel.from_pretrained('bert-large-uncased', output_hidden_states = True) ###
