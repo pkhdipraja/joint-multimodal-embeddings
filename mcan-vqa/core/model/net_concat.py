@@ -65,10 +65,10 @@ class Net(nn.Module):
 
         if __C.BERT_ENCODER:
             self.bert_encode = True
-            self.encoder = BertModel.from_pretrained('bert-large-uncased')
+            self.encoder = BertModel.from_pretrained('bert-base-uncased')
         else:
             self.bert_encode = False
-            self.bert = BertModel.from_pretrained('bert-large-uncased', output_hidden_states = True) ###
+            self.bert = BertModel.from_pretrained('bert-base-uncased', output_hidden_states = True) ###
             # freeze BERT layers
             for p in self.bert.parameters():
                 p.requires_grad = False
@@ -83,7 +83,7 @@ class Net(nn.Module):
         #     self.embedding.weight.data.copy_(torch.from_numpy(pretrained_emb))
         
         self.lstm = nn.LSTM(
-            input_size=4096,#3072,#__C.WORD_EMBED_SIZE,
+            input_size=__C.WORD_EMBED_SIZE,
             hidden_size=__C.HIDDEN_SIZE,
             num_layers=1,
             batch_first=True
@@ -116,9 +116,11 @@ class Net(nn.Module):
         else:
             # Pre-process Language Features, sum last four hidden layers
             outputs = self.bert(ques_ix) ###
-            hidden_states = outputs[2] ###
+            hidden_states = outputs[2]
             concat_layers = torch.cat([hidden_states[i] for i in [-1,-2,-3,-4]], dim=-1)
+            print('concat layers 1:', concat_layers.size())
             concat_layers = concat_layers[:, 1:-1, :]
+            print('concat layers 2:', concat_layers.size())
             lang_feat, _ = self.lstm(concat_layers) ###
 
         # Pre-process Image Feature

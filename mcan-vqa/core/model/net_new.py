@@ -65,10 +65,10 @@ class Net(nn.Module):
 
         if __C.BERT_ENCODER:
             self.bert_encode = True
-            self.encoder = BertModel.from_pretrained('bert-large-uncased')
+            self.encoder = BertModel.from_pretrained('bert-base-uncased')
         else:
             self.bert_encode = False
-            self.bert = BertModel.from_pretrained('bert-large-uncased', output_hidden_states = True) ###
+            self.bert = BertModel.from_pretrained('bert-base-uncased', output_hidden_states = True) ###
             # freeze BERT layers
             for p in self.bert.parameters():
                 p.requires_grad = False
@@ -83,7 +83,7 @@ class Net(nn.Module):
         #     self.embedding.weight.data.copy_(torch.from_numpy(pretrained_emb))
         
         self.lstm = nn.LSTM(
-            input_size=4096,#3072,#__C.WORD_EMBED_SIZE,
+            input_size=__C.WORD_EMBED_SIZE,
             hidden_size=__C.HIDDEN_SIZE,
             num_layers=1,
             batch_first=True
@@ -117,9 +117,25 @@ class Net(nn.Module):
             # Pre-process Language Features, sum last four hidden layers
             outputs = self.bert(ques_ix) ###
             hidden_states = outputs[2] ###
-            concat_layers = torch.cat([hidden_states[i] for i in [-1,-2,-3,-4]], dim=-1)
-            concat_layers = concat_layers[:, 1:-1, :]
-            lang_feat, _ = self.lstm(concat_layers) ###
+            token_embeddings = torch.stack(hidden_states, dim=0) ###
+            print('token embeds 1 (stack):', token_embeddings.size())
+            token_embeddings = torch.squeeze(token_embeddings, dim=1) ###
+            print('token embeds 2 (squeeze):', token_embeddings.size())
+            token_embeddings = token_embeddings.permute(1, 0, 2) ###
+            print('token embeds 3 (permute):', token_embeddings.size())
+            token_vecs_sum = [] ###
+            for token in token_embeddings: ###
+                sum_vec = torch.sum(token[-4:], dim=0) ###
+                token_vecs_sum.append(sum_vec) ###
+
+            token_vecs_sum = torch.stack(token_vecs_sum) ###
+            print('sum 1 (stack):', token_vecs_sum.size())
+            token_vecs_sum = token_vecs_sum.unsqueeze(0) ###
+            print('sum 2 (unsqueeze):', token_vecs_sum.size())
+            token_vecs_sum = token_vecs_sum[:, 1:-1, :]#.permute() ###
+            #token_vecs_sum = token_vecs_sum.permute(1,0,2)
+            print('sum 3 (MAX_TOKEN to 14):', token_vecs_sum.size())
+            lang_feat, _ = self.lstm(token_vecs_sum) ###
 
         # Pre-process Image Feature
         img_feat = self.img_feat_linear(img_feat)

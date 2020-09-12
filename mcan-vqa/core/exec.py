@@ -10,7 +10,6 @@ from core.model.optim import get_optim, adjust_lr
 from core.data.data_utils import shuffle_list
 from utils.vqa import VQA
 from utils.vqaEval import VQAEval
-
 #from torch.utils.tensorboard import SummaryWriter
 
 import os, json, torch, datetime, pickle, copy, shutil, time
@@ -46,7 +45,6 @@ class Execution:
 
         # Tensorboard
  #       writer = SummaryWriter('/cache/tensorboard-logdir/' + self.__C.CKPT_VERSION)
-
 
         # Define the MCAN model
         net = Net(
@@ -210,7 +208,6 @@ class Execution:
  #                                     loss_sum / 1000,
  #                                     epoch * len(dataloader) + step
  #                   )
-
 
                 # Gradient norm clipping
                 if self.__C.GRAD_NORM_CLIP > 0:

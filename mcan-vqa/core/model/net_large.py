@@ -68,9 +68,9 @@ class Net(nn.Module):
             self.encoder = BertModel.from_pretrained('bert-large-uncased')
         else:
             self.bert_encode = False
-            self.bert = BertModel.from_pretrained('bert-large-uncased', output_hidden_states = True) ###
+            self.bert_layer = BertModel.from_pretrained('bert-large-uncased') ###
             # freeze BERT layers
-            for p in self.bert.parameters():
+            for p in self.bert_layer.parameters():
                 p.requires_grad = False
        #     self.embedding = nn.Embedding(
         #        num_embeddings=token_size,
@@ -83,7 +83,7 @@ class Net(nn.Module):
         #     self.embedding.weight.data.copy_(torch.from_numpy(pretrained_emb))
         
         self.lstm = nn.LSTM(
-            input_size=4096,#3072,#__C.WORD_EMBED_SIZE,
+            input_size=__C.WORD_EMBED_SIZE,
             hidden_size=__C.HIDDEN_SIZE,
             num_layers=1,
             batch_first=True
@@ -114,12 +114,11 @@ class Net(nn.Module):
             last_hidden_state = outputs[0]
             lang_feat = last_hidden_state[:, 1:-1, :]  # remove CLS and SEP, making this to MAX_TOKEN = 14
         else:
-            # Pre-process Language Features, sum last four hidden layers
-            outputs = self.bert(ques_ix) ###
-            hidden_states = outputs[2] ###
-            concat_layers = torch.cat([hidden_states[i] for i in [-1,-2,-3,-4]], dim=-1)
-            concat_layers = concat_layers[:, 1:-1, :]
-            lang_feat, _ = self.lstm(concat_layers) ###
+            # Pre-process Language Feature
+            outputs = self.bert_layer(ques_ix) ###
+            last_hidden_state = outputs[0] ###
+            last_reshape = last_hidden_state[:, 1:-1, :] ###
+            lang_feat, _ = self.lstm(last_reshape) ###
 
         # Pre-process Image Feature
         img_feat = self.img_feat_linear(img_feat)
