@@ -33,6 +33,7 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
+\usepackage{amsmath}
 
 \title{Joint Multimodal Embeddings}
 
@@ -126,14 +127,43 @@ To address the aforementioned problems, \citet{yu2019mcan} proposed modular co-a
 
 The GA unit is almost similar to the SA unit. It is composed of multi-head attention and FFNN layer. The GA unit accepts two group of input features $X$ and $Y = [y_{1}, \dots, y_{n}]$ where $n$ is number of features for another modality (i.e. if $X$ is a question embedding, $Y$ should be an image embedding and vice versa). The GA unit learn to model pairwise relationship between every possible pairing $\langle x_{i},y_{j} \rangle$ from $X$ and $Y$. The output $Z$ for GA unit can be understood as attended features for $X$ guided by $Y$. In order to guide the attention learning, for GA unit key and value matrices for multi-head attention are computed with respect to $Y$, while queries are computed with respect to $X$. 
 
-In a sense, the attended output feature $z_{i} \in Z$ can be seen as reconstruction of $x_{i} \in X$: 1) by all $x \in X$ with respect to their normalized intra-modal similarities to $x_{i}$ for the SA unit and 2) by all $y \in Y$ with respect to their normalized cross-modal similarity to $x_{i}$ for the GA unit. Both SA and GA unit can be modularly combined to obtain various configurations. For instance, 2 SA units can be used to model the dense intra-modal interaction between each question word pairs and each image region pairs separately. Afterwards, the attended visual and question features are fed to a GA unit to model dense inter-modal interactions between each word with each image region. 
+In a sense, the attended output feature $z_{i} \in Z$ can be seen as reconstruction of $x_{i} \in X$: 1) by all $x \in X$ with respect to their normalized intra-modal similarities to $x_{i}$ for the SA unit and 2) by all $y \in Y$ with respect to their normalized cross-modal similarity to $x_{i}$ for the GA unit. Both SA and GA unit can be modularly combined to obtain various configurations. For instance, 2 SA units can be used to model the dense intra-modal interaction between each question word pairs $Y$ and each image region pairs $X$ separately. Afterwards, the attended visual and question features are fed to a GA unit to model dense inter-modal interactions between each word with each image region. We refer to this configuration as SA(Y) - SGA(X,Y) in the paper.
 
-In this model, a single-layer LSTM encoder \citep{lstm} is used to compute question representations from GloVe embeddings \citep{pennington2014glove}. Instead of using only the last hidden state of LSTM encoder, MCAN utilises the hidden states for all time steps as question embedding, yielding feature matrix $I \in \mathbb{R}^{n \times d_{i}}$ where $n$ is the number of words in the question and $d_{i}$ is the size of LSTM hidden units. For image representation, a set of regional visual features in a bottom-up manner \citep{Anderson_2018_CVPR} are extracted from a Faster R-CNN \citep{faster_rcnn} with ResNet-101 backbone. Each $k$-th object is represented as $d_{j}$-dimensional feature vector by mean-pooling the convolutional feature from its detected region, resulting in image feature matrix $J \in \mathbb{R}^{m \times d_{j}}$ where $m$ is the number of detected objects.
+In this model, a single-layer LSTM encoder \citep{lstm} is used to compute question representations from GloVe embeddings \citep{pennington2014glove}. Instead of using only the last hidden state of LSTM encoder, MCAN utilises the hidden states for all time steps as question embedding, yielding feature matrix $I \in \mathbb{R}^{n \times d_{i}}$ where $n$ is the number of words in the question and $d_{i}$ is the size of LSTM hidden units. For image representation, a set of regional visual features in a bottom-up manner \citep{Anderson_2018_CVPR} are extracted from a Faster R-CNN \citep{faster_rcnn} with ResNet-101 backbone \citep{residual}. Each $k$-th object is represented as $d_{j}$-dimensional feature vector by mean-pooling the convolutional feature from its detected region, resulting in image feature matrix $J \in \mathbb{R}^{m \times d_{j}}$ where $m$ is the number of detected objects.
 
-There are two variants of deep co-attention models using the MCA layer: \textit{stacking} and \textit{encoder-decoder}. In \textit{stacking} model, $L$ MCA layers are stacked in depth with $Z_{I}^{(L)}$ and $Z_{Q}^{(L)}$ as the final attended image and question features respectively. On the other side, \textit{encoder-decoder} model is derived from Transformer architecture \citep{transformers}. Instead of using $Y^{(l)}$ as input features to guide the attention learning of the GA unit for each $l$-th layer of MCA, only the question features from the last MCA layer $Y^{(L)}$ is utilised. This can be seen as 
+There are two variants of deep co-attention models using the MCA layer: \textit{stacking} and \textit{encoder-decoder}. In \textit{stacking} model, $L$ MCA layers are stacked in depth with $Z_{I}^{(L)}$ and $Z_{Q}^{(L)}$ as the final attended image and question features respectively. The input features are passed recursively formulated as follows:
+\begin{align}
+    [X^{(l)}, Y^{(l)}] = \text{MCA}^{(l)}([X^{(l-1)}, Y^{(l-1)}])
+\end{align}
+
+On the other side, \textit{encoder-decoder} model is derived from Transformer architecture \citep{transformers}. Instead of using $Y^{(l)}$ as input features to guide the attention learning of the GA unit for each $l$-th layer of MCA, only the question features from the last MCA layer $Y^{(L)}$ is utilised. This can be seen as an encoder learning the attended question features $Y^{(L)}$ and a decoder learning the attended image features $X^{(L)}$ conditioned on $Y^{(L)}$. The computation for \textit{encoder-decoder} model is as follows:
+\begin{align}
+    Y^{(l)} &= \text{SA}^{(l)}(Y^{(l-1)}) \\
+    X^{(l)} &= \text{SGA}^{(l)}([X^{(l-1)}, Y^{(L)}])
+\end{align}
+using SA(Y) - SGA(X,Y) configuration as an example. In both variants, input features $X^{(0)}$ and $Y^{(0)} $ are set to $X$ and $Y$, respectively.
+
+In the last phase, an attentional reduction model with a two-layer FFNN with ReLU activation and dropout units is used to obtain final attended features $\Tilde{x}$ and $\Tilde{y}$ separately. Both $\Tilde{x}$ and $\Tilde{y}$ are obtained as the following:
+\begin{align}
+    \alpha^{x} &= \text{softmax}(\text{FFNN}_{x}(X^{(L)})) \\
+    \alpha^{y} &= \text{softmax}(\text{FFNN}_{y}(Y^{(L)})) \\
+    \Tilde{x} &= \sum_{i=1}^{m}\alpha^{x}_{i}x^{(L)}_{i} \\ 
+     \Tilde{y} &= \sum_{i=1}^{n}\alpha^{y}_{i}y^{(L)}_{i}
+\end{align}
+where $\alpha^{x}$ and $\alpha^{y}$ are the learned attention weights for $X$ and $Y$ respectively. The multimodal fusion feature is then computed as element-wise sum:
+\begin{align}
+    z = \text{LayerNorm}(W^{\top}_{x}\Tilde{x} + W^{\top}_{y}\Tilde{y})
+\end{align}
+where $W_{x}, W_{y} \in \mathbb{R}^{d \times d_{z}}$ are two transformation matrices and $d_{z}$ is the dimension of the fused feature. The fused feature $z$ can then be used to make predictions by projecting it to a vector $s \in \mathbb{R}^{N}$ followed by a sigmoid activation, where $N$ is the number of the most frequent answers obtained from the training set.
 
 \subsection{Vision-and-Language BERT (ViLBERT)}
 % also discuss uniter, vl-bert, lxmert, etc? change section name?
+Recently, BERT \citep{devlin-etal-2019-bert} has achieved state-of-the-art results on a wide array of NLP tasks, such as question answering, natural language inference, and named entity recognition, without any substantial task-specific architecture modifications. \citet{lu2019vilbert} proposed Vision \& Language BERT (ViLBERT), which is an extension of BERT to jointly learn task-agnostic visual grounding and reason about text and images. 
+
+In ViLBERT, two parallel BERT-style architecture are used to model intra-modal interactions and fuse them through attention-based cross modal interactions. Beside standard transformer blocks \citep{transformers}, a novel co-attentional transformer layer is also introduced to facilitate information exchange between different modalities. The co-attentional transformer layer enable simultaneous attention learning by computing key and value matrices from each modality and passing them as input to another modality multi-head attention layer. As a consequence, the multi-head attention layer produces attended image features conditioned on language and attended language features conditioned on image. Both attended features are then feeded through a FFNN according to their respective stream with a residual connection with their initial representations, followed by layer normalization (similar to standard transformer layer). The model itself is composed of alternating transformer blocks and co-attentional transformer layers stacked in series. 
+
+%pre-training objectives, %image representation
+
 
 \section{Approach}
 %also explain rationale why to choose both models and differences between them
