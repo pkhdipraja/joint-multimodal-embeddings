@@ -106,11 +106,6 @@ Our project aims to examine the question whether representations derived from pr
 \todo{General note: revise Introduction according to our report: add/shorten paragraphs where needed}
 
 \section{Related Work}
-
-mcan\citep{yu2019mcan}
-
-vilbert\citeauthor{lu2019vilbert}
-
 \subsection{Advances in Multimodal Embeddings} \label{embeds}
 %bilinear?
 
@@ -215,7 +210,28 @@ The objective in multi-modal alignment prediction is to present the model with i
 
 \citet{lu2020multitask} improved ViLBERT further with multi-task learning, resulting in a single unified model that can perform impressively on many language and vision tasks such as visual question answering, caption-based image retrieval, grounding referring expressions and visual entailment. Multi-task ViLBERT consider 4 groups of tasks to train on --- vocab-based VQA (VQAv2 \citep{goyal2017vqa2}, GQA \citep{hudson2019gqa}, and Visual Genome QA \citep{krishnavisualgenome}), image retrieval (MS-COCO \citep{coco} and Flickr30K \citep{plummer2015vdg}), referring expressions (RefCOCO(+/g) \citep{kazemzadeh-etal-2014-referitgame, maorefcoco}, Visual7W \citep{zhu2016cvpr}, and GuessWhat \citep{guesswhat_game}), and multi-modal verification ($\text{NVLR}^2$ \citep{suhr-etal-2019-corpus} and  SNLI-VE \citep{xie2018visual}). Multi-modal verification is the task where given one or more images and a natural language sentence, the model should determine the truthness or predict the semantic relationship between the sentence and the image. 
 
-For each task, a task-specific network is added on top of a ViLBERT model with shared parameters across all tasks.
+For each task, a task-specific layer is added on top of a ViLBERT model with shared parameters across all tasks. In order to accommodate this, a new task token $\mathtt{TASK}_{t}$ is also added such that the input to ViLBERT is $\{\mathtt{IMG}, v_{1}, \dots, v_{\tau}, \mathtt{CLS}, \mathtt{TASK}_{t}, w_{1}, \dots, w_{\tau}, \mathtt{SEP}\}$. Vocab-based VQA is treated as multi-label classification, where Hadamard product between $h_{\mathtt{IMG}}$ and $h_{\mathtt{CLS}}$ are computed and passed to two-layer FFNN with sigmoid activation as follows:
+\begin{align}
+    P_{v}(A|I, Q) = \sigma(\text{FFNN}(h_{\mathtt{IMG}} \odot h_{\mathtt{CLS}}))
+\end{align}
+where $A$ is the answer, $I$ is the image and $Q$ is the question. For image retrieval, the task-specific layer is trained in 4-way multiple-choice setting against hard-negatives. An alignment score is computed between image-caption pairs formulated as:
+\begin{align}
+    \mathtt{Rel}(I,Q) = W_{i}(h_{\mathtt{IMG}} \odot h_{\mathtt{CLS}})
+\end{align}
+where $W_{i} \in \mathbb{R}^{d \times 1}$ followed with a softmax activation. The referring expressions task is viewed as reranking of a set of image region proposals given the referring expression. The final representation $h_{v_{i}}$ for each image region $i$ is passed through a projection layer $W_{r} \in \mathbb{R}^{d \times 1}$ to learn a matching score between the proposed region and the matching score: 
+\begin{align}
+    \mathtt{Rel}(v_{i}, Q) = W_{r}h_{vi}
+\end{align}
+where in this case Q can be either a phrase, question or dialog depending on the datasets (RefCOCO(+/g), Visual7W, and GuessWhat). 
+
+Lastly, 2 different task-specific heads are defined for multi-modal verification due to different task structure between $\text{NVLR}^2$ and SNLI-VE. In the case of $\text{NVLR}^{2}$, the model must determine the truthness of the statement given the images, which is framed as a classification problem. Given an embedding that encodes two image-statement pairs $(I_{0}, Q)$ and $(I_{1}, Q)$, the truthness probability is computed with a 2-layer FFNN as follows:
+\begin{align}
+    P_{v}(C|I_{0}, I_{1}, Q) = \text{softmax}\left(\text{FFNN}\left(\begin{bmatrix} 
+    h_{\mathtt{IMG}}^{0} \odot h_{\mathtt{CLS}}^{0} \\
+    h_{\mathtt{IMG}}^{1} \odot h_{\mathtt{CLS}}^{1}
+    \end{bmatrix}\right)\right)
+\end{align}
+where $\mathbb{[}\: \mathbb{]}$ is concatenation. As for SNLI-VE, the input is an image premise and a text hypothesis and the model must predict the relation between the image and the statement (entailment, neutral, contradiction). Using a linear layer, the element-wise product between $h_{\mathtt{IMG}}$ and $h_{\mathtt{CLS}}$ is then mapped to one of the three labels.
 
 %pre-training objectives, image feature 12-in-1
 
