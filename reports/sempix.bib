@@ -541,11 +541,14 @@ abstract = {Time underlies many interesting human behaviors. Thus, the question 
 }
 
 
-@inproceedings{krishnavisualgenome,
-  title={Visual Genome: Connecting Language and Vision Using Crowdsourced Dense Image Annotations},
-  author={Krishna, Ranjay and Zhu, Yuke and Groth, Oliver and Johnson, Justin and Hata, Kenji and Kravitz, Joshua and Chen, Stephanie and Kalantidis, Yannis and Li, Li-Jia and Shamma, David A and Bernstein, Michael and Fei-Fei, Li},
-  year = {2016},
-  url = {https://arxiv.org/abs/1602.07332},
+@article{krishnavisualgenome,
+author = {Krishna, Ranjay and Zhu, Yuke and Groth, Oliver and Johnson, Justin and Hata, Kenji and Kravitz, Joshua and Chen, Stephanie and Kalantidis, Yannis and Li, Li-Jia and Shamma, David A and Bernstein, Michael and Fei-Fei, Li},
+year = {2017},
+title = {Visual Genome: Connecting Language and Vision Using Crowdsourced Dense Image Annotations},
+journal = {International Journal of Computer Vision},
+volume = {123},
+pages = {32--73},
+url = {https://doi.org/10.1007/s11263-016-0981-7},
 }
 
 @InProceedings{coco,
@@ -630,3 +633,803 @@ year = {2017}
     archivePrefix={arXiv},
     primaryClass={cs.CV}
 }
+
+@article{bengio2013represent,
+  author={Y. {Bengio} and A. {Courville} and P. {Vincent}},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence}, 
+  title={Representation Learning: A Review and New Perspectives}, 
+  year={2013},
+  volume={35},
+  number={8},
+  pages={1798-1828}
+}
+
+@inproceedings{mikolov2013distri,
+author = {Mikolov, Tomas and Sutskever, Ilya and Chen, Kai and Corrado, Greg and Dean, Jeffrey},
+title = {Distributed Representations of Words and Phrases and Their Compositionality},
+year = {2013},
+publisher = {Curran Associates Inc.},
+address = {Red Hook, NY, USA},
+abstract = {The recently introduced continuous Skip-gram model is an efficient method for learning high-quality distributed vector representations that capture a large number of precise syntactic and semantic word relationships. In this paper we present several extensions that improve both the quality of the vectors and the training speed. By subsampling of the frequent words we obtain significant speedup and also learn more regular word representations. We also describe a simple alternative to the hierarchical softmax called negative sampling.An inherent limitation of word representations is their indifference to word order and their inability to represent idiomatic phrases. For example, the meanings of "Canada" and "Air" cannot be easily combined to obtain "Air Canada". Motivated by this example, we present a simple method for finding phrases in text, and show that learning good vector representations for millions of phrases is possible.},
+booktitle = {Proceedings of the 26th International Conference on Neural Information Processing Systems - Volume 2},
+pages = {3111–3119},
+numpages = {9},
+location = {Lake Tahoe, Nevada},
+series = {NIPS'13}
+}
+
+@article{dmello2015review,
+author = {D'mello, Sidney K. and Kory, Jacqueline},
+title = {A Review and Meta-Analysis of Multimodal Affect Detection Systems},
+year = {2015},
+issue_date = {April 2015},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {47},
+number = {3},
+issn = {0360-0300},
+url = {https://doi.org/10.1145/2682899},
+doi = {10.1145/2682899},
+journal = {ACM Comput. Surv.},
+month = feb,
+articleno = {43},
+numpages = {36},
+keywords = {survey, evaluation, Affective computing, human-centered computing, methodology}
+}
+
+@inproceedings{silberer2014learning,
+    title = {Learning Grounded Meaning Representations with Autoencoders},
+    author = {Silberer, Carina  and
+      Lapata, Mirella},
+    booktitle = {Proceedings of the 52nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+    month = {jun},
+    year = {2014},
+    address = {Baltimore, Maryland},
+    publisher = {Association for Computational Linguistics},
+    url = {https://www.aclweb.org/anthology/P14-1068},
+    doi = {10.3115/v1/P14-1068},
+    pages = {721--732},
+}
+
+@inproceedings{mroueh2015deep,
+  author={Y. {Mroueh} and E. {Marcheret} and V. {Goel}},
+  booktitle={2015 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)}, 
+  title={Deep multimodal learning for Audio-Visual Speech Recognition}, 
+  year={2015},
+  volume={},
+  number={},
+  pages={2130-2134}
+}
+  
+@inproceedings{ngiam2011multimodal,
+  title={Multimodal Deep Learning},
+  author={J. Ngiam and A. Khosla and Mingyu Kim and Juhan Nam and H. Lee and A. Ng},
+  booktitle={ICML},
+  year={2011}
+}
+
+@inproceedings{wu2014exploring,
+  title={Exploring Inter-feature and Inter-class Relationships with Deep Neural Networks for Video Classification},
+  author={Zuxuan Wu and Yu-Gang Jiang and Jun Wang and Jian Pu and X. Xue},
+  booktitle={MM '14},
+  year={2014}
+}
+
+@InProceedings{salakhutdinov2009boltz,
+  title = 	 {Deep Boltzmann Machines},
+  author = 	 {Ruslan Salakhutdinov and Geoffrey Hinton},
+  pages = 	 {448--455},
+  year = 	 {2009},
+  editor = 	 {David van Dyk and Max Welling},
+  volume = 	 {5},
+  booktitle = 	 {Proceedings of Machine Learning Research},
+  address = 	 {Hilton Clearwater Beach Resort, Clearwater Beach, Florida USA},
+  month = 	 {16--18 Apr},
+  publisher =    {PMLR},
+  pdf = 	 {http://proceedings.mlr.press/v5/salakhutdinov09a/salakhutdinov09a.pdf},
+  url = 	 {http://proceedings.mlr.press/v5/salakhutdinov09a.html},
+  abstract = 	 {We present a new learning algorithm for Boltzmann machines that contain many layers of hidden variables. Data-dependent expectations are estimated using a variational approximation that tends to focus on a single mode, and data-independent expectations are approximated using persistent Markov chains. The use of two quite different techniques for estimating the two types of expectation that enter into the gradient of the log-likelihood makes it practical to learn Boltzmann machines with multiple hidden layers and millions of parameters. The learning can be made more efficient by using a layer-by-layer “pre-training” phase that allows variational inference to be initialized by a single bottom-up pass. We present results on the MNIST and NORB datasets showing that deep Boltzmann machines learn good generative models and perform well on handwritten digit and visual object recognition tasks.}
+}
+
+@inproceedings{chen2015multi,
+author = {Chen, Shizhe and Jin, Qin},
+title = {Multi-Modal Dimensional Emotion Recognition Using Recurrent Neural Networks},
+year = {2015},
+isbn = {9781450337434},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2808196.2811638},
+doi = {10.1145/2808196.2811638},
+booktitle = {Proceedings of the 5th International Workshop on Audio/Visual Emotion Challenge},
+pages = {49--56},
+numpages = {8},
+keywords = {affective computing, emotion recognition, recurrent neural network},
+location = {Brisbane, Australia},
+series = {AVEC '15}
+}
+
+@article{nicolaou2011contin,
+  author={M. A. {Nicolaou} and H. {Gunes} and M. {Pantic}},
+  journal={IEEE Transactions on Affective Computing}, 
+  title={Continuous Prediction of Spontaneous Affect from Multiple Cues and Modalities in Valence-Arousal Space}, 
+  year={2011},
+  volume={2},
+  number={2},
+  pages={92-105}
+ }
+  
+@InProceedings{rajagopalan2016extend,
+author={Rajagopalan, Shyam Sundar
+and Morency, Louis-Philippe
+and Baltru\u{s}aitis, Tadas
+and Goecke, Roland},
+editor={Leibe, Bastian
+and Matas, Jiri
+and Sebe, Nicu
+and Welling, Max},
+title={Extending Long Short-Term Memory for Multi-View Structured Learning},
+booktitle={Computer Vision -- ECCV 2016},
+year={2016},
+publisher={Springer International Publishing},
+address={Cham},
+pages={338--353},
+}
+
+@inproceedings{weston2011wsabie,
+author = {Weston, Jason and Bengio, Samy and Usunier, Nicolas},
+title = {WSABIE: Scaling up to Large Vocabulary Image Annotation},
+year = {2011},
+isbn = {9781577355151},
+publisher = {AAAI Press},
+abstract = {Image annotation datasets are becoming larger and larger, with tens of millions of images and tens of thousands of possible annotations. We propose a strongly performing method that scales to such datasets by simultaneously learning to optimize precision at the top of the ranked list of annotations for a given image and learning a low-dimensional joint embedding space for both images and annotations. Our method, called WSABIE, both outperforms several baseline methods and is faster and consumes less memory.},
+booktitle = {Proceedings of the Twenty-Second International Joint Conference on Artificial Intelligence - Volume Volume Three},
+pages = {2764–2770},
+numpages = {7},
+location = {Barcelona, Catalonia, Spain},
+series = {IJCAI'11}
+}
+
+@inproceedings{frome2013devise,
+  title={DeViSE: A Deep Visual-Semantic Embedding Model},
+  author={Andrea Frome and G. S. Corrado and Jonathon Shlens and S. Bengio and J. Dean and Marc'Aurelio Ranzato and Tomas Mikolov},
+  booktitle={NIPS},
+  year={2013}
+}
+
+@inproceedings{pan2016joint,
+  author    = {Yingwei Pan and
+               Tao Mei and
+               Ting Yao and
+               Houqiang Li and
+               Yong Rui},
+  title     = {Jointly Modeling Embedding and Translation to Bridge Video and Language},
+  booktitle = {2016 {IEEE} Conference on Computer Vision and Pattern Recognition,
+               {CVPR} 2016, Las Vegas, NV, USA, June 27-30, 2016},
+  pages     = {4594--4602},
+  publisher = {{IEEE} Computer Society},
+  year      = {2016},
+  url       = {https://doi.org/10.1109/CVPR.2016.497},
+  doi       = {10.1109/CVPR.2016.497},
+  timestamp = {Mon, 18 Nov 2019 15:08:29 +0100},
+  biburl    = {https://dblp.org/rec/conf/cvpr/PanMYLR16.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+
+@misc{wang2014hashing,
+author = {Wang, Jingdong and Shen, Heng Tao and Song, Jingkuan and Ji, Jianqiu},
+title = {Hashing for Similarity Search: A Survey},
+year = {2014},
+month = {August},
+abstract = {Similarity search (nearest neighbor search) is a problem of pursuing the data items whose distances to a query item are the smallest from a large database. Various methods have been developed to address this problem, and recently a lot of efforts have been devoted to approximate search. In this paper, we present a survey on one of the main solutions, hashing, which has been widely studied since the pioneering work locality sensitive hashing. We divide the hashing algorithms two main categories: locality sensitive hashing, which designs hash functions without exploring the data distribution and learning to hash, which learns hash functions according the data distribution, and review them from various aspects, including hash function design and distance measure and search scheme in the hash coding space.},
+url = {https://www.microsoft.com/en-us/research/publication/hashing-similarity-search-survey/},
+}
+
+@article{bronstein2010data,
+  title={Data fusion through cross-modality metric learning using similarity-sensitive hashing},
+  author={M. Bronstein and A. Bronstein and F. Michel and N. Paragios},
+  journal={2010 IEEE Computer Society Conference on Computer Vision and Pattern Recognition},
+  year={2010},
+  pages={3594-3601}
+}
+
+@article{jiang2015class,
+title = {The classification of multi-modal data with hidden conditional random field},
+journal = {Pattern Recognition Letters},
+volume = {51},
+pages = {63 - 69},
+year = {2015},
+issn = {0167-8655},
+doi = {https://doi.org/10.1016/j.patrec.2014.08.005},
+url = {http://www.sciencedirect.com/science/article/pii/S0167865514002517},
+author = {Xinyang Jiang and Fei Wu and Yin Zhang and Siliang Tang and Weiming Lu and Yueting Zhuang},
+keywords = {Hidden conditional random field, Latent structure, Multi-modal classification},
+}
+
+@article{hotelling1936relations,
+ ISSN = {00063444},
+ URL = {http://www.jstor.org/stable/2333955},
+ author = {Harold Hotelling},
+ journal = {Biometrika},
+ number = {3/4},
+ pages = {321--377},
+ publisher = {[Oxford University Press, Biometrika Trust]},
+ title = {Relations Between Two Sets of Variates},
+ volume = {28},
+ year = {1936}
+}
+
+@article{hardoon2004canonical,
+  author={D. R. {Hardoon} and S. {Szedmak} and J. {Shawe-Taylor}},
+  journal={Neural Computation}, 
+  title={Canonical Correlation Analysis: An Overview with Application to Learning Methods}, 
+  year={2004},
+  volume={16},
+  number={12},
+  pages={2639-2664}
+}
+
+@InProceedings{klein2015associating,
+author = {Klein, Benjamin and Lev, Guy and Sadeh, Gil and Wolf, Lior},
+title = {Associating Neural Word Embeddings With Deep Image Representations Using Fisher Vectors},
+booktitle = {Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+month = {June},
+year = {2015}
+}
+
+@inproceedings{Rasiwasia2010ANA,
+  title={A new approach to cross-modal multimedia retrieval},
+  author={Nikhil Rasiwasia and J. C. Pereira and E. Coviello and G. Doyle and G. Lanckriet and R. Levy and N. Vasconcelos},
+  booktitle={ACM Multimedia},
+  year={2010}
+}
+
+@article{sargin2007audio,
+  author={M. E. {Sargin} and Y. {Yemez} and E. {Erzin} and A. M. {Tekalp}},
+  journal={IEEE Transactions on Multimedia}, 
+  title={Audiovisual Synchronization and Fusion Using Canonical Correlation Analysis}, 
+  year={2007},
+  volume={9},
+  number={7},
+  pages={1396-1403}
+}
+
+@incollection{slaney2001facesync,
+title = {FaceSync: A Linear Operator for Measuring Synchronization of Video Facial Images and Audio Tracks},
+author = {Malcolm Slaney and Michele Covell},
+booktitle = {Advances in Neural Information Processing Systems 13},
+editor = {T. K. Leen and T. G. Dietterich and V. Tresp},
+pages = {814--820},
+year = {2001},
+publisher = {MIT Press},
+url = {http://papers.nips.cc/paper/1921-facesync-a-linear-operator-for-measuring-synchronization-of-video-facial-images-and-audio-tracks.pdf}
+}
+
+@inproceedings{leong2011going,
+    title ={Going Beyond Text: A Hybrid Image-Text Approach for Measuring Word Relatedness},
+    author = {Leong, Chee Wee  and
+      Mihalcea, Rada},
+    booktitle = {Proceedings of 5th International Joint Conference on Natural Language Processing},
+    month = {nov},
+    year = {2011},
+    address = {Chiang Mai, Thailand},
+    publisher = {Asian Federation of Natural Language Processing},
+    url = {https://www.aclweb.org/anthology/I11-1162},
+    pages = {1403--1407},
+}
+
+@inproceedings{bruni2011distri,
+author = {Bruni, Elia and Tran, Giang Binh and Baroni, Marco},
+title = {Distributional Semantics from Text and Images},
+year = {2011},
+isbn = {9781937284169},
+publisher = {Association for Computational Linguistics},
+address = {USA},
+abstract = {We present a distributional semantic model combining text- and image-based features. We evaluate this multimodal semantic model on simulating similarity judgments, concept clustering and the BLESS benchmark. When integrated with the same core text-based model, image-based features are at least as good as further text-based features, and they capture different qualitative aspects of the tasks, suggesting that the two sources of information are complementary.},
+booktitle = {Proceedings of the GEMS 2011 Workshop on GEometrical Models of Natural Language Semantics},
+pages = {22–32},
+numpages = {11},
+location = {Edinburgh, Scotland},
+series = {GEMS '11}
+}
+
+@inproceedings{gunes2005affect,
+  author={H. {Gunes} and M. {Piccardi}},
+  booktitle={2005 IEEE International Conference on Systems, Man and Cybernetics}, 
+  title={Affect recognition from face and body: early fusion vs. late fusion}, 
+  year={2005},
+  volume={4},
+  number={},
+  pages={3437-3443 Vol. 4},}
+
+@inproceedings{snoek2005late,
+author = {Snoek, Cees G. M. and Worring, Marcel and Smeulders, Arnold W. M.},
+title = {Early versus Late Fusion in Semantic Video Analysis},
+year = {2005},
+isbn = {1595930442},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1101149.1101236},
+doi = {10.1145/1101149.1101236},
+booktitle = {Proceedings of the 13th Annual ACM International Conference on Multimedia},
+pages = {399–402},
+numpages = {4},
+keywords = {semantic concept detection, early fusion, multimedia understanding, late fusion},
+location = {Hilton, Singapore},
+series = {MULTIMEDIA '05}
+}
+
+@article{atrey2010hybrid,
+	doi = {10.1007/s00530-010-0182-0},
+	url = {https://doi.org/10.1007%2Fs00530-010-0182-0},
+	year = 2010,
+	month = {apr},
+	publisher = {Springer Science and Business Media {LLC}},
+	volume = {16},
+	number = {6},
+	pages = {345--379},
+	author = {Pradeep K. Atrey and M. Anwar Hossain and Abdulmotaleb El Saddik and Mohan S. Kankanhalli},
+	title = {Multimodal fusion for multimedia analysis: a survey},
+	journal = {Multimedia Systems}
+}
+
+@inproceedings{shutova2016black,
+    title = {Black Holes and White Rabbits: Metaphor Identification with Visual Features},
+    author = {Shutova, Ekaterina  and
+      Kiela, Douwe  and
+      Maillard, Jean},
+    booktitle = {Proceedings of the 2016 Conference of the North {A}merican Chapter of the Association for Computational Linguistics: Human Language Technologies},
+    month = {jun},
+    year = {2016},
+    address = {San Diego, California},
+    publisher = {Association for Computational Linguistics},
+    url = {https://www.aclweb.org/anthology/N16-1020},
+    doi = {10.18653/v1/N16-1020},
+    pages = {160--170},
+}
+
+@InProceedings{morvant2014vote,
+author={Morvant, Emilie
+and Habrard, Amaury
+and Ayache, St{\'e}phane},
+editor={Fr{\"a}nti, Pasi
+and Brown, Gavin
+and Loog, Marco
+and Escolano, Francisco
+and Pelillo, Marcello},
+title={Majority Vote of Diverse Classifiers for Late Fusion},
+booktitle={Structural, Syntactic, and Statistical Pattern Recognition},
+year={2014},
+publisher={Springer Berlin Heidelberg},
+address={Berlin, Heidelberg},
+pages={153--162},
+isbn={978-3-662-44415-3}
+}
+
+@ARTICLE{potamianos2003noise,
+  author={G. {Potamianos} and C. {Neti} and G. {Gravier} and A. {Garg} and A. W. {Senior}},
+  journal={Proceedings of the IEEE}, 
+  title={Recent advances in the automatic recognition of audiovisual speech}, 
+  year={2003},
+  volume={91},
+  number={9},
+  pages={1306-1326}
+}
+
+@article{evangelopoulos2013variance,
+	doi = {10.1109/tmm.2013.2267205},
+	url = {https://doi.org/10.1109%2Ftmm.2013.2267205},
+	year = 2013,
+	month = {nov},
+	publisher = {Institute of Electrical and Electronics Engineers ({IEEE})},
+	volume = {15},
+	number = {7},
+	pages = {1553--1568},
+	author = {Georgios Evangelopoulos and Athanasia Zlatintsi and Alexandros Potamianos and Petros Maragos and Konstantinos Rapantzikos and Georgios Skoumas and Yannis Avrithis},
+	title = {Multimodal Saliency and Fusion for Movie Summarization Based on Aural, Visual, and Textual Attention},
+	journal = {{IEEE} Transactions on Multimedia}
+}
+
+@InProceedings{glodek2011learned,
+author={Glodek, Michael
+and Tschechne, Stephan
+and Layher, Georg
+and Schels, Martin
+and Brosch, Tobias
+and Scherer, Stefan
+and K{\"a}chele, Markus
+and Schmidt, Miriam
+and Neumann, Heiko
+and Palm, G{\"u}nther
+and Schwenker, Friedhelm},
+editor={D'Mello, Sidney
+and Graesser, Arthur
+and Schuller, Bj{\"o}rn
+and Martin, Jean-Claude},
+title={Multiple Classifier Systems for the Classification of Audio-Visual Emotional States},
+booktitle={Affective Computing and Intelligent Interaction},
+year={2011},
+publisher={Springer Berlin Heidelberg},
+address={Berlin, Heidelberg},
+pages={359--368},
+isbn={978-3-642-24571-8}
+}
+
+@inproceedings{ramirez2011learned,
+author = {Ramirez, Geovany A. and Baltru\v{s}aitis, Tadas and Morency, Louis-Philippe},
+title = {Modeling Latent Discriminative Dynamic of Multi-Dimensional Affective Signals},
+year = {2011},
+isbn = {9783642245701},
+publisher = {Springer-Verlag},
+address = {Berlin, Heidelberg},
+booktitle = {Proceedings of the 4th International Conference on Affective Computing and Intelligent Interaction - Volume Part II},
+pages = {396--406},
+numpages = {11},
+keywords = {latent variable models, audio-visual emotion recognition, multi-modal fusion, conditional random fields},
+location = {Memphis, TN},
+series = {ACII'11}
+}
+
+@InProceedings{wu2005speaker,
+author={Wu, Zhiyong
+and Cai, Lianhong
+and Meng, Helen},
+editor={Zhang, David
+and Jain, Anil K.},
+title={Multi-level Fusion of Audio and Visual Features for Speaker Identification},
+booktitle={Advances in Biometrics},
+year={2005},
+publisher={Springer Berlin Heidelberg},
+address={Berlin, Heidelberg},
+pages={493--499},
+isbn={978-3-540-31621-3}
+}
+
+@article{lan2014multimedia,
+author = {Lan, Zhen-zhong
+and Bao, Lei
+and Yu, Shoou-I
+and Liu, Wei
+and Hauptmann, Alexander},
+year = {2014},
+title = {Multimedia classification and event detection using double fusion},
+journal = {Multimedia Tools and Applications},
+volume = {71},
+pages = {333--347},
+url = {https://doi.org/10.1007/s11042-013-1391-2}
+}
+
+@article{goenen2011kernel,
+author = {G\"{o}nen, Mehmet and Alpayd\i{}n, Ethem},
+title = {Multiple Kernel Learning Algorithms},
+year = {2011},
+issue_date = {2/1/2011},
+publisher = {JMLR.org},
+volume = {12},
+number = {null},
+issn = {1532-4435},
+journal = {J. Mach. Learn. Res.},
+month = jul,
+pages = {2211–2268},
+numpages = {58}
+}
+
+@article{bucak2014kernel,
+  author={S. S. {Bucak} and R. {Jin} and A. K. {Jain}},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence}, 
+  title={Multiple Kernel Learning for Visual Object Recognition: A Review}, 
+  year={2014},
+  volume={36},
+  number={7},
+  pages={1354-1369},}
+
+@inproceedings{gehler2009kernel,
+  author={P. {Gehler} and S. {Nowozin}},
+  booktitle={2009 IEEE 12th International Conference on Computer Vision}, 
+  title={On feature combination for multiclass object classification}, 
+  year={2009},
+  volume={},
+  number={},
+  pages={221-228},}
+
+@inproceedings{chen2014recog,
+author = {Chen, JunKai and Chen, Zenghai and Chi, Zheru and Fu, Hong},
+title = {Emotion Recognition in the Wild with Feature Fusion and Multiple Kernel Learning},
+year = {2014},
+isbn = {9781450328852},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2663204.2666277},
+doi = {10.1145/2663204.2666277},
+booktitle = {Proceedings of the 16th International Conference on Multimodal Interaction},
+pages = {508--513},
+numpages = {6},
+keywords = {support vector machine, hog_top, multiple kernel learning, emotion recognition, feature fusion},
+location = {Istanbul, Turkey},
+series = {ICMI '14}
+}
+
+@inproceedings{jaques2015multi,
+	author = {Jaques, N. and Taylor, S. and Sano, A. and Picard, R.W.},
+	title = {Multi-task, Multi-Kernel Learning for Estimating Individual Wellbeing},
+	booktitle = {NIPS Workshop on Multimodal Machine Learning},
+	address = {Montreal, Quebec}, 
+	year = {2015},
+	url = {https://www.media.mit.edu/publications/multi-task-multi-kernel-learning-for-estimating-individual-wellbeing/}
+}
+
+Export Citation
+
+@inproceedings{sikka2013multiple,
+author = {Sikka, Karan and Dykstra, Karmen and Sathyanarayana, Suchitra and Littlewort, Gwen and Bartlett, Marian},
+title = {Multiple Kernel Learning for Emotion Recognition in the Wild},
+year = {2013},
+isbn = {9781450321297},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2522848.2531741},
+doi = {10.1145/2522848.2531741},
+booktitle = {Proceedings of the 15th ACM on International Conference on Multimodal Interaction},
+pages = {517--524},
+numpages = {8},
+keywords = {support vector machine, multimodal, feature fusion, multiple kernel learning, bag of words},
+location = {Sydney, Australia},
+series = {ICMI '13}
+}
+
+@inproceedings{poria2015deep,
+    title = {Deep Convolutional Neural Network Textual Features and Multiple Kernel Learning for Utterance-level Multimodal Sentiment Analysis},
+    author = {Poria, Soujanya  and
+      Cambria, Erik  and
+      Gelbukh, Alexander},
+    booktitle = {Proceedings of the 2015 Conference on Empirical Methods in Natural Language Processing},
+    month = sep,
+    year = {2015},
+    address = {Lisbon, Portugal},
+    publisher = {Association for Computational Linguistics},
+    url = {https://www.aclweb.org/anthology/D15-1303},
+    doi = {10.18653/v1/D15-1303},
+    pages = {2539--2544},
+}
+
+@article{yeh2012novel,
+author = {Yeh, Yi-Ren and Lin, Ting-Chu and Chung, Yung-Yu and Wang, Yu-Chiang Frank},
+year = {2012},
+month = {06},
+pages = {563--574},
+title = {A Novel Multiple Kernel Learning Framework for Heterogeneous Feature Fusion and Variable Selection},
+volume = {14},
+journal = {IEEE Transactions on Multimedia - TMM},
+doi = {10.1109/TMM.2012.2188783}
+}
+
+@inproceedings{lafferty2001crf,
+author = {Lafferty, John D. and McCallum, Andrew and Pereira, Fernando C. N.},
+title = {Conditional Random Fields: Probabilistic Models for Segmenting and Labeling Sequence Data},
+year = {2001},
+isbn = {1558607781},
+publisher = {Morgan Kaufmann Publishers Inc.},
+address = {San Francisco, CA, USA},
+booktitle = {Proceedings of the Eighteenth International Conference on Machine Learning},
+pages = {282--289},
+numpages = {8},
+series = {ICML '01}
+}
+
+@article{quattoni2007hcrf,
+author = {Quattoni, Ariadna and Wang, Sybor and Morency, Louis-Philippe and Collins, Michael and Darrell, Trevor},
+title = {Hidden Conditional Random Fields},
+year = {2007},
+issue_date = {October 2007},
+publisher = {IEEE Computer Society},
+address = {USA},
+volume = {29},
+number = {10},
+issn = {0162-8828},
+url = {https://doi.org/10.1109/TPAMI.2007.1124},
+doi = {10.1109/TPAMI.2007.1124},
+abstract = {We present a discriminative latent variable model for classification problems in structured domains where inputs can be represented by a graph of local observations. A hidden-state Conditional Random Field framework learns a set of latent variables conditioned on local features. Observations need not be independent and may overlap in space and time.},
+journal = {IEEE Trans. Pattern Anal. Mach. Intell.},
+month = oct,
+pages = {1848--1852},
+numpages = {5},
+keywords = {object recognition, classification, supervised learning, model}
+}
+
+@inproceedings{song2012multi,
+author = {Song, Yale and Morency, Louis-Philippe and Davis, Randall},
+title = {Multimodal Human Behavior Analysis: Learning Correlation and Interaction across Modalities},
+year = {2012},
+isbn = {9781450314671},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2388676.2388684},
+doi = {10.1145/2388676.2388684},
+booktitle = {Proceedings of the 14th ACM International Conference on Multimodal Interaction},
+pages = {27--30},
+numpages = {4},
+keywords = {kernel methods, canonical correlation analysis, multimodal signal processing, multi-view latent variable discriminative models},
+location = {Santa Monica, California, USA},
+series = {ICMI '12}
+}
+
+@incollection{qin2009global,
+title = {Global Ranking Using Continuous Conditional Random Fields},
+author = {Qin, Tao and Tie-yan Liu and Xu-dong Zhang and De-sheng Wang and Li, Hang},
+booktitle = {Advances in Neural Information Processing Systems 21},
+editor = {D. Koller and D. Schuurmans and Y. Bengio and L. Bottou},
+pages = {1281--1288},
+year = {2009},
+publisher = {Curran Associates, Inc.},
+url = {http://papers.nips.cc/paper/3402-global-ranking-using-continuous-conditional-random-fields.pdf}
+}
+  
+@inproceedings{gurban2008dynamic,
+author = {Gurban, Mihai and Thiran, Jean-Philippe and Drugman, Thomas and Dutoit, Thierry},
+title = {Dynamic Modality Weighting for Multi-Stream HMMs in Audio-Visual Speech Recognition},
+year = {2008},
+isbn = {9781605581989},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/1452392.1452442},
+doi = {10.1145/1452392.1452442},
+booktitle = {Proceedings of the 10th International Conference on Multimodal Interfaces},
+pages = {237--240},
+numpages = {4},
+keywords = {multimodal fusion, stream reliability, audio-visual speech recognition, multi-stream hmm},
+location = {Chania, Crete, Greece},
+series = {ICMI '08}
+}
+
+@inproceedings{baltrusaitis2013dimensional,
+  author={T. {Baltru\u{s}aitis} and N. {Banda} and P. {Robinson}},
+  booktitle={2013 10th IEEE International Conference and Workshops on Automatic Face and Gesture Recognition (FG)}, 
+  title={Dimensional affect recognition using Continuous Conditional Random Fields}, 
+  year={2013},
+  volume={},
+  number={},
+  pages={1-8},}
+  
+@incollection{gao2015are,
+title = {Are You Talking to a Machine? Dataset and Methods for Multilingual Image Question},
+author = {Gao, Haoyuan and Mao, Junhua and Zhou, Jie and Huang, Zhiheng and Wang, Lei and Xu, Wei},
+booktitle = {Advances in Neural Information Processing Systems 28},
+editor = {C. Cortes and N. D. Lawrence and D. D. Lee and M. Sugiyama and R. Garnett},
+pages = {2296--2304},
+year = {2015},
+publisher = {Curran Associates, Inc.},
+url = {http://papers.nips.cc/paper/5641-are-you-talking-to-a-machine-dataset-and-methods-for-multilingual-image-question.pdf}
+}
+
+@inproceedings{malinowski2015ask,
+  author={M. {Malinowski} and M. {Rohrbach} and M. {Fritz}},
+  booktitle={2015 IEEE International Conference on Computer Vision (ICCV)}, 
+  title={Ask Your Neurons: A Neural-Based Approach to Answering Questions about Images}, 
+  year={2015},
+  volume={},
+  number={},
+  pages={1-9},}
+ 
+@InProceedings{xu2016ask,
+author={Xu, Huijuan
+and Saenko, Kate},
+editor={Leibe, Bastian
+and Matas, Jiri
+and Sebe, Nicu
+and Welling, Max},
+title={Ask, Attend and Answer: Exploring Question-Guided Spatial Attention for Visual Question Answering},
+booktitle={Computer Vision -- ECCV 2016},
+year={2016},
+publisher={Springer International Publishing},
+address={Cham},
+pages={451--466},
+isbn={978-3-319-46478-7}
+}
+
+@article{neverova2016moddrop,
+  author={N. {Neverova} and C. {Wolf} and G. {Taylor} and F. {Nebout}},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence}, 
+  title={ModDrop: Adaptive Multi-Modal Gesture Recognition}, 
+  year={2016},
+  volume={38},
+  number={8},
+  pages={1692--1706},}
+
+@article{kahou2015EmoNets,
+  title={EmoNets: Multimodal deep learning approaches for emotion recognition in video},
+  author={S. Kahou and Xavier Bouthillier and Pascal Lamblin and Çaglar G{\"u}lçehre and Vincent Michalski and Kishore Reddy Konda and S{\'e}bastien Jean and Pierre Froumenty and Yann Dauphin and Nicolas Boulanger-Lewandowski and Raul Chandias Ferrari and M. Mirza and David Warde-Farley and Aaron C. Courville and Pascal Vincent and R. Memisevic and C. Pal and Yoshua Bengio},
+  journal={Journal on Multimodal User Interfaces},
+  year={2015},
+  volume={10},
+  pages={99--111}
+}
+
+@inproceedings{nojavanasghari2016deep,
+author = {Nojavanasghari, Behnaz and Gopinath, Deepak and Koushik, Jayanth and Baltru\v{s}aitis, Tadas and Morency, Louis-Philippe},
+title = {Deep Multimodal Fusion for Persuasiveness Prediction},
+year = {2016},
+isbn = {9781450345569},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2993148.2993176},
+doi = {10.1145/2993148.2993176},
+booktitle = {Proceedings of the 18th ACM International Conference on Multimodal Interaction},
+pages = {284--288},
+numpages = {5},
+keywords = {Persuasiveness, deep neural networks, multimodal fusion},
+location = {Tokyo, Japan},
+series = {ICMI '16}
+}
+
+@inproceedings{jin2016video,
+author = {Jin, Qin and Liang, Junwei},
+title = {Video Description Generation Using Audio and Visual Cues},
+year = {2016},
+isbn = {9781450343596},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2911996.2912043},
+doi = {10.1145/2911996.2912043},
+booktitle = {Proceedings of the 2016 ACM on International Conference on Multimedia Retrieval},
+pages = {239--242},
+numpages = {4},
+keywords = {image caption, video description, audio analysis, deep neural networks},
+location = {New York, New York, USA},
+series = {ICMR '16}
+}
+
+@inproceedings{venugopalan2016improving,
+    title = {Improving {LSTM}-based Video Description with Linguistic Knowledge Mined from Text},
+    author = {Venugopalan, Subhashini  and
+      Hendricks, Lisa Anne  and
+      Mooney, Raymond  and
+      Saenko, Kate},
+    booktitle = {Proceedings of the 2016 Conference on Empirical Methods in Natural Language Processing},
+    month = nov,
+    year = {2016},
+    address = {Austin, Texas},
+    publisher = {Association for Computational Linguistics},
+    url = {https://www.aclweb.org/anthology/D16-1204},
+    doi = {10.18653/v1/D16-1204},
+    pages = {1961--1966},
+}
+  
+@InProceedings{andrew2013deep,
+  title = 	 {Deep Canonical Correlation Analysis},
+  author = 	 {Galen Andrew and Raman Arora and Jeff Bilmes and Karen Livescu},
+  pages = 	 {1247--1255},
+  year = 	 {2013},
+  editor = 	 {Sanjoy Dasgupta and David McAllester},
+  volume = 	 {28},
+  booktitle = 	 {Proceedings of Machine Learning Research},
+  address = 	 {Atlanta, Georgia, USA},
+  month = 	 {17--19 Jun},
+  publisher =    {PMLR},
+  pdf = 	 {http://proceedings.mlr.press/v28/andrew13.pdf},
+  url = 	 {http://proceedings.mlr.press/v28/andrew13.html},
+}
+
+@inproceedings{vendrov2016order,
+	author = {Vendrov, Ivan and Kiros, Ryan and Fidler, Sanja and Urtasun, Raquel},
+	year = {2016},
+	pages = {},
+	title = {Order-Embeddings of Images and Language},
+	booktitle = {Proc. Int. Conf. Learn. Representations}
+}
+
+@inproceedings{bookscorpus,
+author = {Zhu, Yukun and Kiros, Ryan and Zemel, Rich and Salakhutdinov, Ruslan and Urtasun, Raquel and Torralba, Antonio and Fidler, Sanja},
+title = {Aligning Books and Movies: Towards Story-Like Visual Explanations by Watching Movies and Reading Books},
+year = {2015},
+isbn = {9781467383912},
+publisher = {IEEE Computer Society},
+address = {USA},
+url = {https://doi.org/10.1109/ICCV.2015.11},
+doi = {10.1109/ICCV.2015.11},
+abstract = {Books are a rich source of both fine-grained information, how a character, an object or a scene looks like, as well as high-level semantics, what someone is thinking, feeling and how these states evolve through a story. This paper aims to align books to their movie releases in order to provide rich descriptive explanations for visual content that go semantically far beyond the captions available in the current datasets. To align movies and books we propose a neural sentence embedding that is trained in an unsupervised way from a large corpus of books, as well as a video-text neural embedding for computing similarities between movie clips and sentences in the book. We propose a context-aware CNN to combine information from multiple sources. We demonstrate good quantitative performance for movie/book alignment and show several qualitative examples that showcase the diversity of tasks our model can be used for.},
+booktitle = {Proceedings of the 2015 IEEE International Conference on Computer Vision (ICCV)},
+pages = {19–27},
+numpages = {9},
+series = {ICCV '15}
+}
+  
+

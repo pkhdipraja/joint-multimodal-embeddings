@@ -37,6 +37,7 @@
 \usepackage{graphicx}		% include figures
 \usepackage{float}			% keeps figures in place
 \usepackage{xurl}           % keeps URL from overflowing
+\usepackage{subcaption}		% create subfigures
 
 \title{Joint Multimodal Embeddings}
 
@@ -108,10 +109,80 @@ Our project aims to examine the question whether representations derived from pr
 \section{Related Work}
 \subsection{Advances in Multimodal Embeddings} \label{embeds}
 %bilinear?
+% explain the relation of representations and embeddings
+Modality refers to to the way in which something happens or is experienced. Something is multimodal, when it includes multiple such modalities. Taking a walk in the forest can be a multimodal experience: we see trees, hear the wind, smell wood and feel the earth underneath us. A research problem or dataset is characterized as multimodal when it includes multiple modalities such as language (written or spoken), vision (images, videos) or vocal (sounds and para-verbal expressions). The aim of multimodal machine learning is to build models that can process and relate information from multiple modalities. The flow of multimodal information is different depending on the multimodal tasks and model architecture. Multimodal machine learning is a multidisciplinary field with a wide range of application areas such as speech recognition, event detection, emotion and affect, media description, multimedia retrieval and multimedia generation. These applications are faced with challenges such as varying levels of noise and conflicts between modalities. In this section we will mainly focus on the challenges of multimodal representation and multimodal fusion and discuss their advancements.
+
+The challenge of multimodal representation is to learn how to represent and summarize multimodal data in a meaningful way. In order for a computational model to process data, the data first has to be transformed in a format that can be easily processed. The most commonly used format is a vector or tensor representation of an entity referring to a representation or feature. This entity can be an image, audio sample, individual word, or a sentence. There are many challenges that come with representing multiple modalities: combining data from heterogeneous sources, handling missing data and dealing with different levels of noise. Having good representations is crucial for the performance of machine learning problems. Some properties for good performance are smoothness, sparsity, temporal and spatial coherence, and natural clustering among others \citep{bengio2013represent} Most unimodal representations nowadays are data-driven, meaning that they are learned from data using neural architectures and not hand-designed for specific applications (e.g. image features from convolutional neural networks (CNN) \citep{krizhevsky2012imagenet} and textual features by word embeddings \citep{mikolov2013distri}, which we will explain more in section \ref{vqa}). We will now introduce two methods of combining multimodal representations: joint and coordinated representations.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{0.49\linewidth}
+		\includegraphics[width=\linewidth]{joint_representations.png}
+		\caption{Joint representation.}
+		\label{fig:reps1}	
+	\end{subfigure}
+	\begin{subfigure}[b]{0.49\linewidth}
+		\includegraphics[width=\linewidth]{coordinated_representations.png}
+		\caption{Coordinated representations.}
+		\label{fig:reps2}	
+	\end{subfigure}
+	\caption{Structure of joint and coordinated representations.}
+	\label{fig:reps}
+\end{figure}
+\todo{replace figures with own graphs (in progress)}
+
+Joint representations project unimodal representations together into a multimodal space. In Figure \ref{fig:reps1} we can see a graph that illustrates the mathematical expression
+\begin{equation}
+x_m = f(x_1, \dots , x_n)
+\end{equation}
+for joint representation. We can see how the unimodal representations $x_1, \dots , x_n$ are inserted/projected into the function $f$ that could be e.g. be a deep neural network or a recurrent neural network. This results in the joint multimodal representation $x_m$.
+Joint representations are best suited in situations where all the modalities (even more than two) are present during inference. Up until recently most joint representations were a simple concatenation of individual modality features, which is called early fusion \citep{dmello2015review}. More advanced methods are neural networks, graphical models and recurrent neural networks (RNN).
+
+Neural networks are commonly used to combine the modalities images and text \citep{silberer2014learning} or audio \citep{mroueh2015deep, ngiam2011multimodal, wu2014exploring}. They can be trained end-to-end, to learn both representing the data and learning a particular task. Neural network based joint representations have the advantage that they are able to pre-train from unlabeled data, if the available labeled data is not sufficient for supervised learning. One disadvantage is, that they do not naturally have the ability to deal with missing data. Variations of probabilistic graphical models on the other hand have the ability to deal with missing data in a natural way. They use latent random variables to construct representations \citep{bengio2013represent} and do not need supervised data for training \citep{salakhutdinov2009boltz}. Both discussed models are only able to represent fixed length data, whereas RNNs and their variants are able to represent varying length sequences. RNNs have been used in tasks such as affect recognition \citep{chen2015multi, nicolaou2011contin} and multimiodal gesture recognition \citep{rajagopalan2016extend}.
+
+Coordinated representations project each modality into a separate but coordinated space. They are coordinated through a similarity or structure constraint (e.g. minimizing cosine distance \citep{frome2013devise}, maximizing correlation \citep{andrew2013deep}, and enforcing a partial order \citep{vendrov2016order} between the resulting spaces). In Figure \ref{fig:reps2} we can see the graphical illustration of the mathematical expression
+\begin{equation}
+f(x_1) \sim g(x_2)
+\end{equation}
+for coordinated representations. Here we can see that each modality ($x_1$, $x_2$) has a corresponding projection function ($f$, $g$) which is independently mapped into a coordinated multimodal space, which is indicated as $\sim$ in the graph. The amount of modalities has been mostly limited to two for coordinated representations. They are suited for applications where only one modality is present at inference time.
+
+There are two subtypes of coordinated representations, namely similarity models and structured models. The former minimize the distance between modalities in the coordinated space. An early example of this is WSABIE (web scale annotation by image embedding) \citep{weston2011wsabie}, where similarity was enforced between image representations and their annotations through a coordinated space. This was attained through higher inner product, which reduced the cosine distance between the corresponding representations. A newer example for coordinated representations is DeViSE (deep visual-semantic embedding) \citep{frome2013devise}, which is based on neural networks. It is similar to WSABIE, but uses more complex image and word embeddings. Another model similar to DeViSE uses videos instead of images \citep{pan2016joint}.
+Structured coordinated space models go beyond the enforced similarity between representations and  enforce additional constraints between representations. The application usually determines the type of structure that is enforced, with varying constraints for hashing, cross-modal retrieval and image captioning. Cross modal hashing describes the process of compressing high dimensional data into compact binary codes with similar binary codes for similar objects \citep{wang2014hashing}. This can be used for cross-modal retrieval \citep{bronstein2010data, jiang2015class}. Canonical correlation analysis (CCA) \citep{hotelling1936relations} is an example of a structured coordinated space which has been used for cross-modal retrieval \citep{hardoon2004canonical, klein2015associating, Rasiwasia2010ANA} and audiovisual signal analysis \citep{sargin2007audio, slaney2001facesync}. It computes a linear projection which maximizes the correlation between two modalities and enforces orthogonality of the new space.
+
+We previously described early fusion as the simplest form of joint representation. We will now discuss further methods and challenges of multimodal fusion. Multimodal fusion describes the process of joining information from two or more modalities to perform a prediction. There are several issues that might occur, e.g. that information from different modalities may have varying predictive power, noise topology, possibly missing data in at least on of the modalities. However, multimodal fusion methods have many benefits such as allowing more robust prediction, capturing complementary information, and being able to operate, even if one modality is missing. Multimodal fusion can be classified into two main categories: model-agnostic approaches and model-based approaches. The former approach is not directly dependent on a specific machine learning approach and the latter is tied to their construction. In model-agnostic approaches there are different levels of fusion: early fusion \citep{leong2011going, bruni2011distri}, late fusion \citep{gunes2005affect, snoek2005late}, and hybrid fusion \citep{atrey2010hybrid}.
+
+Early fusion or feature level fusion methods create a joint representation of input features from multiple modalities. Once the information is fused, a single model is trained to learn the correlation and interactions between low level features of each modality. The features are commonly concatenated, which (as previously mentioned) is the simplest form of joint representation. The final prediction $p$ is mathematically denoted as
+
+\begin{equation}
+p = h([v_1, \dots , v_m])
+\end{equation}
+
+where $h$ refers to the single model and $ v_1, \dots , v_m$ represent each input modality as a dense vector. The features from different modalities need to be highly engineered and preprocessed, in order for them to align well or share similarities in their semantics. We can infer from the formula that only one model is used to make predictions, which assumes that the model is well suited for all the modalities. Early fusion only requires the training of a single model, which makes the training pipeline easier compared to late and hybrid fusion.
+
+Late fusion or decision level fusion on the other hand performs multimodal integration at later prediction stages. It uses unimodal decision values and fuses them with a fusion mechanism such as averaging \citep{shutova2016black}, voting schemes \citep{morvant2014vote}, weighting based on channel noise \citep{potamianos2003noise} and single variance \citep{evangelopoulos2013variance}, or a learned model \citep{glodek2011learned, ramirez2011learned}. The final prediction can be denoted as
+
+\begin{equation}
+p = F(h_1(v_1), \dots , h_m(v_m))
+\end{equation}
+
+where $F$ represents a fusion mechanism and the model $h_i$ is used on modality $ i (i = 1, \dots , M)$. The use of different models on different modalities allows for more flexibility. It makes it easier to handle a missing modality, since the predictions are made separately. However, late fusion ignores the low level interaction between the modalities and is therefore not effective at modeling signal-level interactions between modalities.
+
+Hybrid fusion exploits the advantages of both the feature level and the decision level fusion strategies in a common framework. Its successful applications include multimodal speaker identification \citep{wu2005speaker} and multimedia event detection \citep{lan2014multimedia}.
+
+Having presented the different fusion methods for model-agnostic approaches, we will now move on to discuss model-based approaches which can be divided into three categories: kernel-based methods, graphical models, and neural networks.
+
+Multiple kernel learning (MKL) methods are an extension to kernel support vector machines (SVM) that are able to use different kernels for different modalities of the data \citep{goenen2011kernel}. MLK enable better fusion of heterogeneous data, because kernel functions can be seen as similarity functions between data points. They have been an especially popular method for fusing visual descriptors for object detection \citep{bucak2014kernel, gehler2009kernel, krizhevsky2012imagenet} and have also been used for other tasks such as multimodal affect recognition \citep{chen2014recog, jaques2015multi, sikka2013multiple}, multimodal sentiment analysis \citep{poria2015deep}, and multimedia event detection \citep{yeh2012novel}. MLK are flexible in kernel selection and can be used to both perform regression and classification. A big disadvantage of MLK is its reliance on training data (support vectors) during test time, which leads to slow inference and a large memory footprint.
+
+Graphical models can generally be classified into two main categories: generative (modeling joint probability) and discriminative (modeling conditional probability). Over the years generative models lost popularity to discriminative ones such as conditional random fields (CRF) \citep{lafferty2001crf} and its variations \citep{quattoni2007hcrf, song2012multi, qin2009global}. Graphical models have the advantage of being able to easily exploit spatial and temporal structure of the data. This makes them especially popular for temporal modeling tasks, such as audio-visual speech recognition (AVSR) \citep{gurban2008dynamic} and multimodal affect recognition \citep{baltrusaitis2013dimensional}.
+
+Neural networks have recently become an increasingly popular way to tackle multimodal fusion. Their field of application encompasses fusing information for visual and media question answering \citep{gao2015are, malinowski2015ask, xu2016ask}, gesture recognition \citep{neverova2016moddrop}, affect analysis \citep{kahou2015EmoNets,nojavanasghari2016deep}, and video description generation \citep{jin2016video, venugopalan2016improving}. Shallow \citep{gao2015are} and deep \citep{nojavanasghari2016deep, venugopalan2016improving} neural neural networks have both been explored for multimodal fusion, whereas the advantage of the latter lies in their capacity to learn from a large amount of data. Another advantage of recent neural architectures is their ability for end-to-end training of both the multimodal representation component and the fusion component. In comparison to other non neural network based systems they show good performance and are able to learn complex decision boundaries. However, they also come with disadvantages such as a requiring large training datasets to be successful and lack of interpretability. The latter makes it difficult to tell what the prediction relies on, and which modalities or features play an important role.
+
+% not sure if this should be included
+Although multimodal learning methods have experienced great advances in recent years there are still some challenges that remain. The heterogeneity of data is an issue, which makes it difficult to map data from one modality to another. The relationship between modalities is often open-ended or subjective, making it hard for evaluation if there is no one correct translation/solution. The discussed multimodal networks are largely static. Future research could potentially work on one modality driving the structure of a network applied to another modality. Multimodal fusion still faces the challenge of signals potentially not being temporally aligned. Another remaining issue is that each modality might exhibit different types and different levels of noise at different points in time.
 
 \subsection{Grounding}
 
-\subsection{Visual Question Answering}
+\subsection{Visual Question Answering} \label{vqa}
 
 %this paragraph is probably too long. Maybe focus more on VQA or make the connectio to the other tasks more obvious.
 The integration of vision and language tasks has significantly advanced multi-disciplinary research/work from fields of computer vision, natural language processing and deep learning. The underlying challenge of this integration is to find methods that understand visual or textual content and are able to generate visual or textual content according to the given task. To solve these challenges multimodal learning models are created that can process and relate information from multiple modalities such as linguistic and visual information. The range of different language and vision integration tasks is quite broad, which is why will only name a few to give a (short) overview. Visual description generation aims to generate a textual description given a visual input \citep{plummer2015vdg} Visual referring expression goes in two directions and includes the task of referring expression generation and comprehension. The former generates a referring expression for a given target object present in a visual scene \citep{fitzgerald2013learning}. Given an image and referring expression, comprehension is performed by localizing an object in an image by using bounding boxes \citep{nagaraja2016modeling}. There are also approaches that combine both generation and comprehension \citep{yu2016modeling} Visual question answering answers questions about visual information \citep{antol2015vqa}. Visual reasoning aims to go beyond the VQA benchmark and answer sophisticated queries by reasoning about visual input \citep{johnson2017clevr}.
@@ -120,7 +191,7 @@ In our project we will mainly focus on the visual question answering task. VQA i
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=\linewidth]{vqa_teddy_tiny.png}
+	\includegraphics[width=\linewidth]{vqa_teddy.pdf}
 	\caption{Given an image and question as input, the visual question answering model predicts an answer to it.}
 	\label{fig:vqa-graph}
 \end{figure}
@@ -139,7 +210,7 @@ Early embedding models have been count based models such as one-hot vector and c
 
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=\linewidth]{lstm.png}
+	\includegraphics[width=\linewidth]{lstm.pdf}
 	\caption{Basic architecture of LSTM question feature extraction.}
 	\label{fig:lstm}
 \end{figure}
@@ -238,7 +309,44 @@ where $\mathbb{[}\: \mathbb{]}$ is concatenation. As for SNLI-VE, the input is a
 
 \section{Approach}
 %also explain rationale why to choose both models and differences between them
+%vilbert co-attentional transformer layers as SA-SA GA-GA, mcan also can be arranged as enc-dec,
+%SGA-SGA lower for MCAN
+%CWR vs glove, add a bit about bert
+%modification of fusion
+\subsection{MCAN vs ViLBERT}
+Despite based on transformer architecture, both MCAN and ViLBERT have several key differences. First of all, in MCAN the information exchange between modalities is unidirectional. Only one modality can be used to guide another modality at a time (e.g. either attended image feature learning guided by question or attended question feature learning guided by image). On the other side, the novel co-attentional layer in ViLBERT allows bidirectional information exchange between language and vision at varying representation depths. Both architectures also differ in how textual and visual representation are fused. MCAN learns to project textual and image representation to a shared space and sum them together, while ViLBERT applies element-wise product between $h_{\mathtt{IMG}}$ and $h_{\mathtt{CLS}}$ as joint representation of the visual and linguistic inputs. 
+
+Interestingly, it turns out that the co-attention mechanism used by ViLBERT can be considered as a special composition of the modular SA and GA units, as depicted in Figure \ref{fig:attention} and \ref{fig:vilbert_coattention}.
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}[b]{\textwidth}
+	\centering
+	\includegraphics[scale=0.7]{attention}
+	\caption{MCAN with SGA(X,Y) - SGA(Y,X) layer.}
+	\label{fig:attention}
+	\end{subfigure}
+	\begin{subfigure}[b]{\textwidth}
+	\centering
+	\includegraphics[scale=0.7]{vilbert_coattention}
+	\caption{ViLBERT co-attentional transformer layer.}
+	\label{fig:vilbert_coattention}
+	\end{subfigure}
+	
+\end{figure}
+
+Here $H_{v}^{(i)}$ and $H_{w}^{(j)}$ are obtained from standard transformer layers. It is important to note that  multi-task ViLBERT as SGA(X,Y) - SGA(Y,X) is trained with different training objectives and additional tokens which yield different visual and textual representations compared to MCAN model. 
+
+Joint representations play an important role in visual question answering and many other language and vision tasks, since they relate important information between visual and textual modalities. As such, comparing joint representations derived from a single unified model (multi-task ViLBERT) against a task-specific model (MCAN) which share similar modular units might reveal the importance of different training objectives in generating highly effective multimodal representations.
+
+%this facts make mcan and vilbert comparable, if we thought vilbert as sga-sga with different training objective and additional tokens, also makes it interesting to compare joint representations derived from a single model compared to ones learned from task-specific model.
+
 \subsection{Applying BERT}
+The original MCAN model uses GloVe as word embeddings, which is non-contextual and trained on global word-word co-occurrence statistics. However, context also provides additional cues which maybe helpful for the model to predict the answer accurately and enrich the information in multimodal embeddings (e.g. distinguishing "bank" as a financial institution and as land besides water provides extra information for the model when answering questions, especially when both appears together in a question). 
+
+Works such as ELMo \citep{peters2018elmo} and BERT \citep{devlin-etal-2019-bert} assign each word a vector as a function of the entire input sequence, which also enables them to model the use of words in a contextual manner. For our experiments, we replace GloVe with contextual word representations from BERT. BERT is a bidirectional language representation model trained jointly with a masked language model and next sentence prediction objective on BooksCorpus \citep{bookscorpus} and English Wikipedia, with an approximate total of 3,300M tokens. We use BERT-base (12-layer transformers, 768-hidden) and BERT-large (24-layer transformers, 1024-hidden).
+% use BERT as features and encoder, exclude BERT-large due to computational constraint.
+
 
 \section{Experimental Setup}
 
@@ -251,6 +359,8 @@ where $\mathbb{[}\: \mathbb{]}$ is concatenation. As for SNLI-VE, the input is a
 %mcan enc-dec
 
 \subsection{Grounding}
+
+\subsection{Fusion}
 
 \section{Results and Discussion}
 %vqa result, gqa result, grounding (possibly with all attention heads with vilbert), ablation of fusion method, transfer performance, attention visualization(?), qualitative analysis of cases where model fails?
