@@ -39,7 +39,7 @@
 \usepackage{xurl}           % keeps URL from overflowing
 \usepackage{subcaption}		% create subfigures
 
-\title{Joint Multimodal Embeddings}
+\title{Joint Multimodal Embeddings} % Comparing Multimodal Representations in Coattention-based Models for Visual Question Answering
 
 % The \author macro works with any number of authors. There are two commands
 % used to separate the names and addresses of multiple authors: \And and \AND.
@@ -109,8 +109,10 @@ Our project aims to examine the question whether representations derived from pr
 \section{Related Work}
 \subsection{Advances in Multimodal Embeddings} \label{embeds}
 %bilinear?
-% explain the relation of representations and embeddings
+% explain the relation of representations and embeddings, features. What can be used interchangeably?
 Modality refers to to the way in which something happens or is experienced. Something is multimodal, when it includes multiple such modalities. Taking a walk in the forest can be a multimodal experience: we see trees, hear the wind, smell wood and feel the earth underneath us. A research problem or dataset is characterized as multimodal when it includes multiple modalities such as language (written or spoken), vision (images, videos) or vocal (sounds and para-verbal expressions). The aim of multimodal machine learning is to build models that can process and relate information from multiple modalities. The flow of multimodal information is different depending on the multimodal tasks and model architecture. Multimodal machine learning is a multidisciplinary field with a wide range of application areas such as speech recognition, event detection, emotion and affect, media description, multimedia retrieval and multimedia generation. These applications are faced with challenges such as varying levels of noise and conflicts between modalities. In this section we will mainly focus on the challenges of multimodal representation and multimodal fusion and discuss their advancements.
+
+\subsubsection{Multimodal Representations}
 
 The challenge of multimodal representation is to learn how to represent and summarize multimodal data in a meaningful way. In order for a computational model to process data, the data first has to be transformed in a format that can be easily processed. The most commonly used format is a vector or tensor representation of an entity referring to a representation or feature. This entity can be an image, audio sample, individual word, or a sentence. There are many challenges that come with representing multiple modalities: combining data from heterogeneous sources, handling missing data and dealing with different levels of noise. Having good representations is crucial for the performance of machine learning problems. Some properties for good performance are smoothness, sparsity, temporal and spatial coherence, and natural clustering among others \citep{bengio2013represent} Most unimodal representations nowadays are data-driven, meaning that they are learned from data using neural architectures and not hand-designed for specific applications (e.g. image features from convolutional neural networks (CNN) \citep{krizhevsky2012imagenet} and textual features by word embeddings \citep{mikolov2013distri}, which we will explain more in section \ref{vqa}). We will now introduce two methods of combining multimodal representations: joint and coordinated representations.
 
@@ -148,6 +150,8 @@ for coordinated representations. Here we can see that each modality ($x_1$, $x_2
 
 There are two subtypes of coordinated representations, namely similarity models and structured models. The former minimize the distance between modalities in the coordinated space. An early example of this is WSABIE (web scale annotation by image embedding) \citep{weston2011wsabie}, where similarity was enforced between image representations and their annotations through a coordinated space. This was attained through higher inner product, which reduced the cosine distance between the corresponding representations. A newer example for coordinated representations is DeViSE (deep visual-semantic embedding) \citep{frome2013devise}, which is based on neural networks. It is similar to WSABIE, but uses more complex image and word embeddings. Another model similar to DeViSE uses videos instead of images \citep{pan2016joint}.
 Structured coordinated space models go beyond the enforced similarity between representations and  enforce additional constraints between representations. The application usually determines the type of structure that is enforced, with varying constraints for hashing, cross-modal retrieval and image captioning. Cross modal hashing describes the process of compressing high dimensional data into compact binary codes with similar binary codes for similar objects \citep{wang2014hashing}. This can be used for cross-modal retrieval \citep{bronstein2010data, jiang2015class}. Canonical correlation analysis (CCA) \citep{hotelling1936relations} is an example of a structured coordinated space which has been used for cross-modal retrieval \citep{hardoon2004canonical, klein2015associating, Rasiwasia2010ANA} and audiovisual signal analysis \citep{sargin2007audio, slaney2001facesync}. It computes a linear projection which maximizes the correlation between two modalities and enforces orthogonality of the new space.
+
+\subsubsection{Multimodal Fusion Methods}
 
 We previously described early fusion as the simplest form of joint representation. We will now discuss further methods and challenges of multimodal fusion. Multimodal fusion describes the process of joining information from two or more modalities to perform a prediction. There are several issues that might occur, e.g. that information from different modalities may have varying predictive power, noise topology, possibly missing data in at least on of the modalities. However, multimodal fusion methods have many benefits such as allowing more robust prediction, capturing complementary information, and being able to operate, even if one modality is missing. Multimodal fusion can be classified into two main categories: model-agnostic approaches and model-based approaches. The former approach is not directly dependent on a specific machine learning approach and the latter is tied to their construction. In model-agnostic approaches there are different levels of fusion: early fusion \citep{leong2011going, bruni2011distri}, late fusion \citep{gunes2005affect, snoek2005late}, and hybrid fusion \citep{atrey2010hybrid}.
 
@@ -201,12 +205,13 @@ Compared to other vision and language tasks such as visual description generatio
 Within the last couple years many researchers have proposed different solutions for the VQA task that generally follow the same structure. The general VQA algorithm can be divided up into three phases: Firstly image featurization and question featurization, secondly joint comprehension, and lastly answer generation.
 In the first phase the given image and question are processed independently to obtain separate vector representations. There are multiple ways to extract information about images and questions of which we will only present a selected few.
 
+\subsubsection{Image and Question Featurization}
+
 In the process of image featurization the system/model needs to extract relevant features of the image to understand the image content. The image feature describes an image as a numerical vector, in order for it to be applied to different mathematical operations. Most VQA models use pre-trained deep neural network models for image featurization, of which convolutional neural network (CNN) \citep{krizhevsky2012imagenet} pre-trained on ImageNet \citep{russakovsky2015imagenet} is the most widely used one because of its good performance. The predominant CNN models trained on ImageNet include AlexNet \citep{krizhevsky2012imagenet}, ZFNet \citep{zeiler2014visual}, VGGNet \citep{simonyan2015very}, GoogleNet \citep{szegedy2015going} and lastly ResNet \citep{residual}, which is currently the most used one by researchers.
 
 Plain text or strings cannot be processed by most machine learning algorithms and almost all deep learning architectures. This demands questions to be prepared in a way that can be processed by the system/model. Word embeddings enable the necessary preprocessing for question featurization. Embeddings can be defined as numerical vectors that represent words or phrases from a vocabulary. These vectors represent a collection of features that hold information about the relation between words. Since word embeddings are trained on word co-occurence, they capture semantic, morphological or contextual information. Different training algorithms and text corpora have an influence on the generated word embeddings. This makes it a challenging task to choose the best embedding for the VQA task.
 
-% find reference for one-hot vector
-Early embedding models have been count based models such as one-hot vector and co-occurence matrix \citep{miller1991contextual}. They are simple to implement and interpret, but quickly run into issues concerning their fast growth as the length of the sparse vector is generally the size of the vocabulary. An alternative method for representing a word is to use a short and dense vector. Prediction based models such as CBOW and skip-gram (also called word2vec) \citep{mikolov2013efficient} directly learn word representation and use neural network as their basic component to train a classifier on a binary prediction task. In the last few years hybrid models that combine count based and predict based methods to produce a word embedding have become more popular in NLP research. One prominent example are global vectors (GloVe) \citep{pennington2014glove}, which perform more accurate than skip-gram, because the global corpus statistics are captured directly by the model. An even newer form of embeddings are contextualized word representations such as ELMo \citep{peters2018elmo} and BERT \citep{devlin-etal-2019-bert}.
+Early embedding models have been count based models such as one-hot vector (a binary vector with exactly one non-zero entry at the position indicating the index of the word in the vocabulary) and co-occurence matrix \citep{miller1991contextual}. They are simple to implement and interpret, but quickly run into issues concerning their fast growth as the length of the sparse vector is generally the size of the vocabulary. An alternative method for representing a word is to use a short and dense vector. Prediction based models such as CBOW and skip-gram (also called word2vec) \citep{mikolov2013efficient} directly learn word representation and use neural network as their basic component to train a classifier on a binary prediction task. In the last few years hybrid models that combine count based and predict based methods to produce a word embedding have become more popular in NLP research. One prominent example are global vectors (GloVe) \citep{pennington2014glove}, which perform more accurate than skip-gram, because the global corpus statistics are captured directly by the model. An even newer form of embeddings are contextualized word representations such as ELMo \citep{peters2018elmo} and BERT \citep{devlin-etal-2019-bert}.
 
 \begin{figure}[H]
 	\centering
@@ -217,12 +222,17 @@ Early embedding models have been count based models such as one-hot vector and c
 
 In advanced methods for question feature extraction in VQA neural networks such as convolutional neural network \citep{krizhevsky2012imagenet}, long short term memory (LSTM) \citep{lstm} and gated recurrent unit (GRU) \citep{cho2014gru} are used. The latter two belong to the recurrent neural network (RNN) family \citep{elman1990finding} \cite{young2018recent} state that sequence based models like RNN do better than word sequence independent methods like word2vec and also claim that LSTM are generally preferred by VQA researchers. It should also be noted that RNN models are not used independently, but are always combined with any traditional embeddings (mentioned previously) that are fed as input to LSTM or GRU. Figure \ref{fig:lstm} shows the basic architecture of LSTM where word embeddings are the input and question feature is generated as output. Both LSTM and GRU are gating based architectures that are designed to capture long-range dependencies and solve the vanishing gradient problem. The LSTM layer has memory cells where it can store context information e.g. of words in a sequence, when the input is a question. The memory is controlled by gates, of which one gate at each input state decides how much of the new input should be written to the memory cell, and how much of the current content of the memory cell should be forgotten. In Figure \ref{fig:lstm} $h_T$ represents the output state vector from the last time step that is used as a question feature. GRU is an alternative to the LSTM, which has fewer gates and does not have separate memory cells.
 
+\subsubsection{Joint Comprehension}
+
 After the image features and question features are extracted, the features are mapped to a joint space and then combined to generate an answer to the question about an image. There is a wide range of techniques for joint comprehension of image and text of which some were already discussed in section \ref{embeds}. We will present a selection methods for combining multi-modal features that is particularly relevant for the VQA task.
 
-\todo{First write section ‘Advances in Multimodal Embeddings’ and then select relevant methods for VQA. Possible inclusions could be: baseline models, encoder-decoder architecture, joint attention models. Briefly describe the architecture, then discuss advantages/disadvantages}
+Examining several baseline fusion methods for VQA such as concatenation, element-wise addition and element-wise multiplication, \cite{malinowski2017ask} have found that element-wise multiplication has more accuracy. A more advanced method for VQA is presented by end-to-end deep neural network models. They aim to capture the associations between the modalities better by training specific layers for joint comprehension of image and question features. The composition and use of the layer varies for different models. An interesting example for this method is introduced by \cite{fukui2016multimodal}, which uses a Multimodal Compact Bilinear Pooling (MCB) layer for joint representation of image and question features. They hypothesize that using the outer product of visual and textual vectors is more expressive than simple baseline fusion methods. Another approach to combine multimodal features is based on encoder-decoder architecture. The decoder takes the image and question representations as input and is then trained to generate a correct answer. LSTM networks are commonly used as decoder and while varying in the way they take feature vectors as input. \cite{ren2015exploring} and \cite{zhu2016cvpr} take image encoding as first or last word of question as input to decoder LSTM. \cite{malinowski2017ask} on the other hand take image encoding along with each word of question.
 
-There are numerous publically available datasets for validating VQA models with their own focus. \todo{depending on how long this section gets just briefly mention some datasets and refer to the discussion of VQA 2.0 in section 4.1. Also include critique of datasets}
-The most used evaluation metric for state-of-the-art VQA models is accuracy, which represents the ratio of the number of correctly answered questions to the number of total questions. 
+The application of attention mechanism has become widely popular for VQA. It enables VQA to ignore image regions that are irrelevant to the given question and choose to focus on important image regions for predicting the correct answer. In the early stage attention mechanism was mainly used for visual attention, where the focus is on regions of the image. An example of this are Stacked Attention Networks \citep{yang2016vqa} that learn attention on image regions through multiple iterations. A more advanced method for VQA is co-attention, which not only requires to learn visual attention on the image but also needs to learn textual attention on the question. One such co-attention learning method was proposed by \cite{lu2016hierarchical} that alternately learns image attention and question attention. Another co-attention model was introduced by \cite{yu2018beyond} where learning occurs in two steps, one is self-attention learning of the question, and the other is question-guided-attention learning of the image. The disadvantage of these mentioned co-attention methods is that they fail to infer the correlation between any question word and any image region because of ignoring the dense interactions between them. \cite{gao2019dynamic} and \cite{yu2019mcan} proposed new models based on deep co-attention that achieve a better performance on the VQA task.
+
+\subsubsection{VQA Datasets}
+
+There are numerous publically available datasets for validating VQA models with their own characteristics. The first proposed dataset for VQA is DAQUAR (DAtaset for QUestion Answering on Real-world images) \citep{malinowski2014vqa} which contains human question- answer pairs about images. Subsequently, several large scale datasets based on Microsoft COCO (Common Object in Context) \citep{lin2014microsoft} have been proposed. COCO-QA \cite{ren2015exploring} uses COCO image captions to automatically generate questions from them and produces answers of a single-word type. The VQA Dataset proposed by \cite{antol2015vqa} contains three questions per image and ten ground-truth answers per question. Visual Genome \citep{krishnavisualgenome} represents a more balanced distribution of question types and has larger average question and answer lengths than the VQA Dataset. Visual7W \citep{zhu2016cvpr} is a part of the Visual Genome and adds a 7th which question category to accommodate visual answers. A significant deficiency in the previously mentioned VQA datasets is that they are biased. The VQA 2.0 dataset \citep{goyal2017vqa2} attempted to reduce language bias by asking the same question for two images and instructing annotators to give opposite answers. We will discuss the VQA 2.0 dataset in more detail in section \ref{datasets}. \cite{kafle2017tdiuc} developed the dataset TDIUC (Task Directed Image Understanding Challenge) to avoid some of the limitations of previous VQA datasets such as unbalanced question types, questions that can be answered by ignoring images, and difficult evaluation process. Their proposed dataset includes more balanced questions and introduces absurd questions force a VQA system to determine if a question is valid for a given image. In addition to that they introduce a new evaluation metrics to compensate for biases in VQA datasets. However, the most used evaluation metric for state-of-the-art VQA models is accuracy, which represents the ratio of the number of correctly answered questions to the number of total questions.
 
 \subsection{Modular Co-Attention Network (MCAN)}
 % explain SA & GA, MCA
@@ -316,7 +326,7 @@ where $\mathbb{[}\: \mathbb{]}$ is concatenation. As for SNLI-VE, the input is a
 \subsection{MCAN vs ViLBERT}
 Despite based on transformer architecture, both MCAN and ViLBERT have several key differences. First of all, in MCAN the information exchange between modalities is unidirectional. Only one modality can be used to guide another modality at a time (e.g. either attended image feature learning guided by question or attended question feature learning guided by image). On the other side, the novel co-attentional layer in ViLBERT allows bidirectional information exchange between language and vision at varying representation depths. Both architectures also differ in how textual and visual representation are fused. MCAN learns to project textual and image representation to a shared space and sum them together, while ViLBERT applies element-wise product between $h_{\mathtt{IMG}}$ and $h_{\mathtt{CLS}}$ as joint representation of the visual and linguistic inputs. 
 
-Interestingly, it turns out that the co-attention mechanism used by ViLBERT can be considered as a special composition of the modular SA and GA units, as depicted in Figure \ref{fig:attention} and \ref{fig:vilbert_coattention}.
+Interestingly, it turns out that the co-attention mechanism used by ViLBERT can be considered as a special composition of the modular SA and GA units, as depicted in Figure \ref{fig:vilbert_coattention}.
 
 \begin{figure}[H]
 	\centering
@@ -324,39 +334,50 @@ Interestingly, it turns out that the co-attention mechanism used by ViLBERT can 
 	\centering
 	\includegraphics[scale=0.7]{attention}
 	\caption{MCAN with SGA(X,Y) - SGA(Y,X) layer.}
-	\label{fig:attention}
 	\end{subfigure}
 	\begin{subfigure}[b]{\textwidth}
 	\centering
 	\includegraphics[scale=0.7]{vilbert_coattention}
 	\caption{ViLBERT co-attentional transformer layer.}
-	\label{fig:vilbert_coattention}
 	\end{subfigure}
-	
+\caption{Comparison of ViLBERT against MCAN with SGA(X,Y) - SGA(Y,X) layer. Note the similarities of information flows between the two models.}
+\label{fig:vilbert_coattention}
 \end{figure}
 
 Here $H_{v}^{(i)}$ and $H_{w}^{(j)}$ are obtained from standard transformer layers. It is important to note that  multi-task ViLBERT as SGA(X,Y) - SGA(Y,X) is trained with different training objectives and additional tokens which yield different visual and textual representations compared to MCAN model. 
 
-Joint representations play an important role in visual question answering and many other language and vision tasks, since they relate important information between visual and textual modalities. As such, comparing joint representations derived from a single unified model (multi-task ViLBERT) against a task-specific model (MCAN) which share similar modular units might reveal the importance of different training objectives in generating highly effective multimodal representations.
+Joint representations play an important role in visual question answering and many other language and vision tasks, since they relate important information between visual and textual modalities. As such, comparing joint representations derived from a single unified model (multi-task ViLBERT) against a task-specific model (MCAN) which share similar modular units might reveal the importance of different training objectives and information flows in generating highly effective multimodal representations.
 
 %this facts make mcan and vilbert comparable, if we thought vilbert as sga-sga with different training objective and additional tokens, also makes it interesting to compare joint representations derived from a single model compared to ones learned from task-specific model.
 
-\subsection{Applying BERT}
-The original MCAN model uses GloVe as word embeddings, which is non-contextual and trained on global word-word co-occurrence statistics. However, context also provides additional cues which maybe helpful for the model to predict the answer accurately and enrich the information in multimodal embeddings (e.g. distinguishing "bank" as a financial institution and as land besides water provides extra information for the model when answering questions, especially when both appears together in a question). 
+\subsection{Applying BERT to MCAN}
+As opposed to ViLBERT linguistic stream that is initialized with BERT, the original MCAN model uses GloVe as word embeddings, which is non-contextual and trained on global word-word co-occurrence statistics. However for VQA, context also provides additional cues which maybe helpful for the model to predict the answer accurately and enrich the information in multimodal embeddings (e.g. distinguishing "bank" as a financial institution and as land besides water provides extra information for the model when answering questions, especially when both appears together in a question). 
 
-Works such as ELMo \citep{peters2018elmo} and BERT \citep{devlin-etal-2019-bert} assign each word a vector as a function of the entire input sequence, which also enables them to model the use of words in a contextual manner. For our experiments, we replace GloVe with contextual word representations from BERT. BERT is a bidirectional language representation model trained jointly with a masked language model and next sentence prediction objective on BooksCorpus \citep{bookscorpus} and English Wikipedia, with an approximate total of 3,300M tokens. We use BERT-base (12-layer transformers, 768-hidden) and BERT-large (24-layer transformers, 1024-hidden).
+Works such as ELMo \citep{peters2018elmo} and BERT \citep{devlin-etal-2019-bert} assign each word a vector as a function of the entire input sequence, which also enables them to model the use of words in a contextual manner. For our experiments, we use contextual word representations from BERT. BERT is a bidirectional language representation model trained jointly with a masked language model and next sentence prediction objective on BooksCorpus \citep{bookscorpus} and English Wikipedia, with an approximate total of 3,300M tokens. We use BERT-base (12-layer transformers, 768-hidden) and BERT-large (24-layer transformers, 1024-hidden). This brings both MCAN and ViLBERT to an equal footing with respect to their word representations.
+
+We apply BERT with two variants: 1) as contextualized word embeddings to replace GloVe and 2) as question encoder, by replacing the entire LSTM-based encoder (with GloVe embeddings as input) in the MCAN model with the BERT transformer. We excluded $\mathtt{CLS}$ token when using BERT both as embedding and as encoder, as $\mathtt{CLS}$ token is mainly included when BERT is used in the fine-tuning manner. For co-attention learning, we use \textit{encoder-decoder} model with SA(Y) - SGA(X,Y) layers as it performed better compared to \textit{stacking} strategy \citep{yu2019mcan}. The architecture for both variants are depicted in Figure \ref{fig:mcan_bert}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[scale=0.7]{enc-dec_mcan_bert}
+	\caption{Encoder-decoder MCAN (SA(Y) - SGA(X,Y)) with BERT. We apply BERT as contextualized word representations and as question encoder, replacing a single-layer LSTM.}
+	\label{fig:mcan_bert}
+\end{figure}
 % use BERT as features and encoder, exclude BERT-large due to computational constraint.
 
 
 \section{Experimental Setup}
+% compare quality of multimodal representations by their performance on vqa and gqa
+% compare question grounding, as proxy to evaluate quality of multimodal representations
+% compare fusion method(?)
 
-\subsection{Datasets}
+\subsection{Datasets} \label{datasets}
 %VQA, image from MSCoco, GQA: statistics for training, included annotation
 
 \subsection{Implementation and Hyperparameters}
 
 \subsection{Baseline Model}
-%mcan enc-dec
+%mcan small enc-dec
 
 \subsection{Grounding}
 
