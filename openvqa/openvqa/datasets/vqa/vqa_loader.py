@@ -9,6 +9,7 @@ from openvqa.core.base_dataset import BaseDataSet
 from openvqa.utils.ans_punct import prep_ans
 from transformers import BertTokenizerFast
 import torch
+import time
 
 class DataSet(BaseDataSet):
     def __init__(self, __C):
@@ -241,14 +242,15 @@ class DataSet(BaseDataSet):
             frcn_feat_x = frcn_feat['x'].transpose((1, 0))
         frcn_feat_iter = self.proc_img_feat(frcn_feat_x, img_feat_pad_size=self.__C.FEAT_SIZE['vqa']['FRCN_FEAT_SIZE'][0])
 
-        bbox_feat_iter = self.proc_img_feat(
-            self.proc_bbox_feat(
-                frcn_feat['bbox'],
-                (frcn_feat['image_h'], frcn_feat['image_w'])
-            ),
-            img_feat_pad_size=self.__C.FEAT_SIZE['vqa']['BBOX_FEAT_SIZE'][0]
-        )
+        # bbox_feat_iter = self.proc_img_feat(
+        #     self.proc_bbox_feat(
+        #         frcn_feat['bbox'],
+        #         (frcn_feat['image_h'], frcn_feat['image_w'])
+        #     ),
+        #     img_feat_pad_size=self.__C.FEAT_SIZE['vqa']['BBOX_FEAT_SIZE'][0]
+        # )
         grid_feat_iter = np.zeros(1)
+        bbox_feat_iter = np.zeros(1)
 
         return frcn_feat_iter, grid_feat_iter, bbox_feat_iter
 
