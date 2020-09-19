@@ -364,13 +364,13 @@ We apply BERT with two variants: 1) as contextualized word embeddings to replace
 	\label{fig:mcan_bert}
 \end{figure}
 % use BERT as features and encoder, exclude BERT-large due to computational constraint.
-
-
 \section{Experimental Setup}
 % compare quality of multimodal representations by their performance on vqa and gqa
 % compare question grounding, as proxy to evaluate quality of multimodal representations
 % compare fusion method(?)
-We aim to investigate the quality of joint multimodal representations derived from task-specific model and single model for various language and vision tasks. Furthermore, we also want to answer to what extent does the models ground their reasoning in the image, rather than making guesses by memorizing question priors from the training data. Our experiment, which we describe below, are intended to analyse how the quality of joint multimodal representations are affected by different training objectives and information flows. 
+We aim to investigate the quality of joint multimodal representations derived from task-specific model and single model for various language and vision tasks. Furthermore, we also want to answer to what extent does the models ground their reasoning in the image, rather than making guesses by memorizing question priors from the training data. Our experiment, which we describe below, are intended to compare the quality of joint multimodal representations and how different training objectives and information flows affect them.
+
+%how the quality of joint multimodal representations are affected by different training objectives and information flows. 
 
 \subsection{Datasets} \label{datasets}
 %VQA, image from MSCoco, GQA: statistics for training, included annotation
@@ -387,13 +387,24 @@ VQA image features are extracted from Faster R-CNN (with ResNet-101 backbone) wh
 
 Again, due to computational constraint, we use pre-trained 6-layer ViLBERT model trained with 12 datasets. Image features for ViLBERT are extracted from a ResNeXT-152 \citep{Xie2016} Faster R-CNN model trained on Visual Genome with attribute loss, resulting in a maximum of 100 image regions. During VQA training, the question words are tokenized into wordpiece tokens and trimmed to a maximum of 23 tokens. For GQA, the question words are truncated to a maximum of 26 tokens. The truncation difference between MCAN and multi-task ViLBERT occurs due to cleaned split used for multi-task training, where test images are removed from \textit{train} or \textit{val} split for all tasks.
 
-\subsection{Baseline Model}
+%\subsection{Baseline Model}
 %mcan small enc-dec
 
 \subsection{Grounding}
 %how we get attention for MCAN and ViLBERT
+%how grounding scores are calculated
+We want to understand to what extent do the joint multimodal representations induced by VQA models relate visual and textual information. Do the models learn superficial correlation in the training data or do they based their reasoning on the images? In order to answer this question, we evaluate question grounding as a proxy to compare the quality of joint multimodal representation. We focus on GQA dataset, as it offers grounding annotation in the form of visual pointer that points regions in the image which the question refers to and is relevant to answer it. 
 
-\subsection{Fusion}
+The question grounding metric is calculated as follows. For each question-image pair $(q, i)$ exists one or multiple pointers $r$ that points to relevant image regions when answering the question. The model visual attention over the image $i$, which is represented by object-based features in our experiments are then intersected with pointer/s $r$ to obtain the intersection rate. Afterwards, the intersection rate for each bounding boxes is multiplied with its attention score and then summed up to obtain the overall attention over $r$. This yields the grounding score for an instance of $(q, i)$. The overall grounding score is then computed by averaging the grounding score over all questions in the dataset. GQA also included spatial-based features for training and evaluation, which we did not have the opportunity to explore due to computational issues.
+
+For MCAN, we use the attention weights obtained from the visual attentional reduction module, with $\alpha = [\alpha_{1}, \alpha_{2}, \dots, \alpha_{m}]$ for $m$ bounding boxes. As for multi-task ViLBERT, we take the self-attention distribution from the last layer for the $h_{\mathtt{IMG}}$ token, as it is the holistic representations of the image. This is intended to get the most accurate attention scores over the image region, as ViLBERT does not have attention reduction module. We also examine the grounding scores for all 8 attention heads to measure how different heads pay attention actively to the image regions. We normalize all bounding boxes for MCAN and multi-task ViLBERT.
+
+We compare grounding scores for MCAN against multi-task ViLBERT, as it measures the grounding capability that a task-specific model can achieve as opposed to single model for various language and vision tasks. Furthermore, it also shows how unidirectional or bidirectional information streams for co-attention learning affect question grounding. 
+
+% bounding boxes are normalized
+
+
+\subsection{Fusion Method}
 
 \section{Results and Discussion}
 %vqa result, gqa result, grounding (possibly with all attention heads with vilbert), ablation of fusion method, transfer performance, attention visualization(?), qualitative analysis of cases where model fails?
