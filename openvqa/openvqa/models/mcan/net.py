@@ -69,7 +69,7 @@ class Net(nn.Module):
         if self.__C.BERT_ENCODER:
             self.encoder = BertModel.from_pretrained(self.__C.BERT_VER)
         elif not self.__C.BERT_ENCODER and self.__C.USE_BERT:
-            self.bert_layer = BertModel.from_pretrained(self.__C.BERT_VER)
+            self.bert_layer = BertModel.from_pretrained(self.__C.BERT_VER, output_hidden_states=True)
             # Freeze BERT layers
             for param in self.bert_layer.parameters():
                 param.requires_grad = False
@@ -115,8 +115,14 @@ class Net(nn.Module):
             lang_feat = last_hidden_state[:, 1:-1, :] # remove CLS and SEP, making this to max_token=14
         elif not self.__C.BERT_ENCODER and self.__C.USE_BERT:
             outputs = self.bert_layer(ques_ix)
-            last_hidden_state = outputs[0][:, 1:-1, :] # remove CLS and SEP, making this to max_token=14
-            lang_feat, _ = self.lstm(last_hidden_state)
+            # Uncomment this to use last layer
+            # last_hidden_state = outputs[0][:, 1:-1, :] # remove CLS and SEP, making this to max_token=14
+            # lang_feat, _ = self.lstm(last_hidden_state)
+            # Concatenation of the last four layers
+            hidden_states = outputs[2]
+            concat_layers = torch.cat([hidden_states[i] for i in [-1, -2, -3, -4]], dim=-1)
+            concat_layers = concat_layers[:, 1:-1, :]
+            lang_feat, _ = self.lstm(concat_layers)
         elif self.__C.USE_GLOVE:
             lang_feat = self.embedding(ques_ix)
             lang_feat, _ = self.lstm(lang_feat)
@@ -143,7 +149,10 @@ class Net(nn.Module):
         )
 
         # Classification layers
-        proj_feat = lang_feat + img_feat
+        if self.__C.FUSION == "sum":
+            proj_feat = lang_feat + img_feat
+        elif self.__C.FUSION == "product":
+            proj_feat = lang_feat * img_feat
         proj_feat = self.proj_norm(proj_feat)
         proj_feat = self.proj(proj_feat)
 

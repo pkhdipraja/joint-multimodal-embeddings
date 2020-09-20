@@ -84,6 +84,9 @@ class BaseCfgs(PATH):
 
         # Pre-load the features into memory to increase the I/O speed
         self.PRELOAD = False
+
+        # Fusion method, 'sum' for eltwise sum, 'product' for eltwise multiplication
+        self.FUSION = "sum"
         
         # Word embedding matrix size
         # (token size x WORD_EMBED_SIZE)
