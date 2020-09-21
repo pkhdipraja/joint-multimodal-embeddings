@@ -12,59 +12,59 @@ Loading questions...
 Loading choices...
 Loading predictions...
 
-Binary: 72.22%
-Open: 38.93%
-Accuracy: 54.21%
+Binary: 72.96%
+Open: 39.37%
+Accuracy: 54.79%
 Validity: 0.00%
 Plausibility: 0.00%
-Distribution: 1.93 (lower is better)
+Distribution: 1.70 (lower is better)
 
 Accuracy / structural type:
-  choose: 72.19% (1129 questions)
-  compare: 62.14% (589 questions)
-  logical: 72.43% (1803 questions)
-  query: 38.93% (6805 questions)
-  verify: 74.69% (2252 questions)
+  choose: 72.36% (1129 questions)
+  compare: 64.18% (589 questions)
+  logical: 72.93% (1803 questions)
+  query: 39.37% (6805 questions)
+  verify: 75.58% (2252 questions)
 
 Accuracy / semantic type:
-  attr: 60.62% (5186 questions)
-  cat: 42.04% (1149 questions)
-  global: 49.04% (157 questions)
-  obj: 85.60% (778 questions)
-  rel: 46.12% (5308 questions)
+  attr: 61.16% (5186 questions)
+  cat: 43.08% (1149 questions)
+  global: 51.59% (157 questions)
+  obj: 87.02% (778 questions)
+  rel: 46.46% (5308 questions)
 
 Accuracy / steps number:
-  1: 68.35% (237 questions)
-  2: 47.87% (6395 questions)
-  3: 57.29% (4266 questions)
-  4: 62.55% (793 questions)
+  1: 69.20% (237 questions)
+  2: 48.66% (6395 questions)
+  3: 58.11% (4266 questions)
+  4: 60.78% (793 questions)
   5: 72.63% (822 questions)
-  6: 82.93% (41 questions)
+  6: 80.49% (41 questions)
   7: 100.00% (20 questions)
   8: 100.00% (3 questions)
   9: 100.00% (1 questions)
 
 Accuracy / words number:
-  3: 25.83% (151 questions)
-  4: 45.24% (630 questions)
-  5: 41.47% (1290 questions)
-  6: 51.30% (2074 questions)
+  3: 31.13% (151 questions)
+  4: 46.98% (630 questions)
+  5: 42.40% (1290 questions)
+  6: 51.45% (2074 questions)
   7: 54.38% (1642 questions)
-  8: 56.20% (1185 questions)
-  9: 60.66% (1281 questions)
-  10: 59.65% (1249 questions)
-  11: 57.34% (994 questions)
-  12: 60.82% (638 questions)
-  13: 55.41% (462 questions)
-  14: 58.55% (345 questions)
-  15: 64.14% (237 questions)
-  16: 66.67% (117 questions)
+  8: 57.38% (1185 questions)
+  9: 61.83% (1281 questions)
+  10: 61.41% (1249 questions)
+  11: 56.14% (994 questions)
+  12: 59.09% (638 questions)
+  13: 55.19% (462 questions)
+  14: 62.32% (345 questions)
+  15: 63.71% (237 questions)
+  16: 61.54% (117 questions)
   17: 59.57% (94 questions)
-  18: 52.63% (76 questions)
-  19: 69.77% (43 questions)
+  18: 56.58% (76 questions)
+  19: 72.09% (43 questions)
   20: 59.38% (32 questions)
-  21: 63.16% (19 questions)
+  21: 68.42% (19 questions)
   22: 66.67% (12 questions)
-  23: 0.00% (4 questions)
+  23: 25.00% (4 questions)
   24: 100.00% (2 questions)
   25: 100.00% (1 questions)
