@@ -642,7 +642,7 @@ def EvaluatingModel(
         features, spatials, image_mask, question, target, input_mask, segment_ids, multiple_choice_ids, co_attention_mask, question_id = (
             batch
         )
-    else:
+    elif task_id == "TASK15":
         features, spatials, image_mask, question, target, input_mask, segment_ids, co_attention_mask, question_id, boxes = (
             batch
         )
@@ -796,16 +796,9 @@ def EvaluatingModel(
         batch_score = 0
 
         # Currently attention extraction only works for batch size=1
-        #print(type(boxes))
-        #print(boxes.size())
-        #print(len(att_score))
-        #print("type", att_score[1][-1]['attn'].size())
-        #print(att_score[1][-1]['attn'][:,1,1,:].size())
-        
         attention = []
-        bboxes = torch.squeeze(boxes)[:,:4]
-        #print(bboxes[3,:].tolist())
-        last_layer_att_score = torch.squeeze(att_score[1][-1]['attn'][:, 7, 0, :]) # batch_size, att_head, target_num_feat, source_num_feat -> use att head 1 and CLS as target
+        bboxes = torch.squeeze(boxes)[:, :4]
+        last_layer_att_score = torch.squeeze(att_score[1][-1]['attn'][:, 7, 0, :])  # batch_size, att_head, target_num_feat, source_num_feat -> use all att head and CLS as target
 
         for num_bbox in range(bboxes.shape[0]):
             bbox_info = bboxes[num_bbox, :].tolist()
