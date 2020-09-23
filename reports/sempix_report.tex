@@ -47,6 +47,7 @@
 \newcolumntype{d}[1]{D{.}{.}{#1}} % "decimal" column type
 \renewcommand{\ast}{{}^{\textstyle *}} % for raised "asterisks"
 
+
 \title{Joint Multimodal Embeddings} % Comparing Multimodal Representations in Co-Attention-Based Models for Visual Question Answering
 
 % The \author macro works with any number of authors. There are two commands
@@ -92,6 +93,8 @@
 
 \maketitle
 
+%general question: should we write integers in text as "1" or "one"? I think we have a mixture at this moment.
+
 \begin{abstract}
 Multimodal vision and language tasks such as visual question answering (VQA) are challenging, because they require both the understanding of image content and natural language. To solve multimodal problems it is crucial to represent data in a meaningful way. One way to do this is to project joint representations to the same space using all of the modalities as input to establish inter-modal relationships. In this project we will investigate whether joint representations derived from pre-trained models are better compared to the joint representations learned from a task-specific model. In an effort to answer this question, we will compare the multi-task Vision-and-Language BERT (ViLBERT) \citep{lu2020multitask} models to the task-specific deep Modular Co-Attention Network (MCAN) \citep{yu2019mcan} on a VQA task and evaluate grounding. Our experimental results demonstrate that \todo{give short summary of our results}. Our code is (publicly) available at Github.\footnote{\url{https://github.com/lkopf/joint-multimodal-embeddings}}.
 \end{abstract}
@@ -129,20 +132,19 @@ The challenge of multimodal representation is to learn how to represent and summ
 
 \begin{figure}[H]
 	\centering
-	\begin{subfigure}[b]{0.49\linewidth}
+	\begin{subfigure}[b]{0.54\linewidth}
 		\includegraphics[width=\linewidth]{joint_reps.pdf}
 		\caption{Joint representation.}
 		\label{fig:reps1}	
 	\end{subfigure}
-	\begin{subfigure}[b]{0.49\linewidth}
-		\includegraphics[width=\linewidth]{coordinated_representations.png}
+	\begin{subfigure}[b]{0.43\linewidth}
+		\includegraphics[width=\linewidth]{coordinated_reps.pdf}
 		\caption{Coordinated representations.}
 		\label{fig:reps2}	
 	\end{subfigure}
 	\caption{Structure of joint and coordinated representations.}
 	\label{fig:reps}
 \end{figure}
-\todo{replace figures with own graphs (in progress)}
 
 Joint representations project unimodal representations together into a multimodal space. In Figure \ref{fig:reps1} we can see a graph that illustrates the mathematical expression
 \begin{equation}
@@ -246,7 +248,7 @@ The application of attention mechanism has become widely popular for VQA. It ena
 \subsection{Grounding}
 
 %not sure if this beginning paragraph is fitting as it only brings up one specific issue with grounding in VQA
-One of the main challenges of a successful VQA system is to identify and recognize the most relevant image regions to the question. As discussed in section \ref{attention}, this is commonly resolved by attention mechanisms. In order to find the regions of the image that lead to the answer, attention mechanisms generate a heatmap over the input image. These heatmaps are interpreted as groundings of the answer to the most relevant areas of the image \citep{zhang2019interpretable}. Given that some questions may not refer directly to the contents of the image, the system will/may require external, common sense knowledge to answer them correctly. This can make it impossible for the system to ground their decision in the image in a human interpretable way.
+One of the main challenges of a successful VQA system is to identify and recognize the most relevant image regions to the question. As discussed in section \ref{attention}, this is commonly resolved by attention mechanisms. In order to find the regions of the image that lead to the answer, attention mechanisms generate an attention map over the input image. These attention maps are interpreted as groundings of the answer to the most relevant areas of the image \citep{zhang2019interpretable}. Given that some questions may not refer directly to the contents of the image, the system will/may require external, common sense knowledge to answer them correctly. This can make it impossible for the system to ground their decision in the image in a human interpretable way.
 
 To get to one of the underlying issues of this we need to take a closer look at how word embeddings get their meaning. Word embeddings are modeled through distributional semantics where the meaning of a word is entirely constituted by patterns of co-occurrence with other words or other linguistic contexts \citep{baroni2016grounding}. From a cognitive perspective, \cite{barsalou1999perceptual} and \cite{fincher2001perceptual} have argued that language is grounded in physical reality and perceptual experience. \cite{barsalou2008grounded} has coined the term \textit{conceptual grounding} that refers to the idea that language is grounded in perceptual experience and sensorimotor interactions with the environment.
 
@@ -289,7 +291,7 @@ In the last phase, an attentional reduction model with a two-layer FFNN with ReL
 \begin{align}
     \alpha^{x} &= \text{softmax}(\text{FFNN}_{x}(X^{(L)})) \\
     \alpha^{y} &= \text{softmax}(\text{FFNN}_{y}(Y^{(L)})) \\
-    \Tilde{x} &= \sum_{i=1}^{m}\alpha^{x}_{i}x^{(L)}_{i} \\ 
+    \Tilde{x} &= \sum_{i=1}^{m}\alpha^{x}_{i}x^{(L)}_{i}  \label{eq_mcan_att} \\ 
      \Tilde{y} &= \sum_{i=1}^{n}\alpha^{y}_{i}y^{(L)}_{i}
 \end{align}
 where $\alpha^{x}$ and $\alpha^{y}$ are the learned attention weights for $X$ and $Y$ respectively. The multimodal fusion feature is then computed as element-wise sum:
@@ -374,7 +376,6 @@ Joint representations play an important role in visual question answering and ma
 %this facts make mcan and vilbert comparable, if we thought vilbert as sga-sga with different training objective and additional tokens, also makes it interesting to compare joint representations derived from a single model compared to ones learned from task-specific model.
 
 \subsection{Applying BERT to MCAN}
-% what exactly do you mean with "ViLBERT linguistic stream" here?
 As opposed to ViLBERT linguistic stream that is initialized with BERT, the original MCAN model uses GloVe as word embeddings, which is non-contextual and trained on global word-word co-occurrence statistics. However for VQA, context also provides additional cues which may be helpful for the model to predict the answer accurately and enrich the information in multimodal embeddings (e.g. distinguishing "bank" as a financial institution and as land besides water provides extra information for the model when answering questions, especially when both appear together in a question). 
 
 Works such as ELMo \citep{peters2018elmo} and BERT \citep{devlin-etal-2019-bert} assign each word a vector as a function of the entire input sequence, which also enables them to model the use of words in a contextual manner. For our experiments, we use contextual word representations from BERT. BERT is a bidirectional language representation model trained jointly with a masked language model and next sentence prediction objective on BooksCorpus \citep{bookscorpus} and English Wikipedia, with an approximate total of 3,300M tokens. We use BERT-base (12-layer transformers, 768-hidden) and BERT-large (24-layer transformers, 1024-hidden). This brings both MCAN and ViLBERT to an equal footing with respect to their word representations.
@@ -450,8 +451,22 @@ where $z$ is the fused representation. Although we use pre-trained multi-task Vi
 %vqa result, gqa result, grounding (possibly with all attention heads with vilbert), ablation of fusion method, transfer performance, attention visualization(?), qualitative analysis of cases where model fails?
 
 \subsection{Comparison on VQA}
+%first write why vilbert might be better, then why mcan might perform worse
+Table \ref{table:vqa_result} summarizes our results for different MCAN models in comparison to multi-task ViLBERT. The baseline MCAN-small corresponds to the one described in \cite{yu2019mcan} using GloVe word embeddings passed through a one-layer LSTM network with a hidden size of 512. We can see that the multi-task ViLBERT model significantly outperforms all MCAN models.
 
-Table \ref{table:vqa_result} summarizes our results for different MCAN models in comparison to multi-task ViLBERT. The baseline MCAN-small corresponds to the one described in \cite{yu2019mcan} using GloVe word embeddings passed through a one-layer LSTM network with a hidden size of 512. We can see that the multi-task ViLBERT model significantly outperforms all MCAN models. Out of all MCAN models, MCAN with BERT-base encoder performs best in all categories and thus outperforms the MCAN baseline model. The MCAN-model with BERT-large features is the only one that has a lower overall score than the MCAN baseline model. The reason for this might be that the dimensionality for the multi-modal features might be too low to model the question representation well. An indication for this could be that the model does not converge during training at the represented epoch in the table (epoch 13) and did not do so after more epochs either (epoch 16, not included in the table). Comparing our best performing model MCAN with BERT-base encoder to both MCAN with BERT-base and BERT-large features, the main difference might be the suitability of the encoder for BERT embeddings. Based on the results we could conclude that BERT-base embeddings might not be as well suited for a LSTM encoder. (Combining both does also not seem to be a common combination, as we could not find any research literature for comparison/reference.) The LSTM we used based on the baselinmodel is unidirectional, which might prevent the model from making full use of the contextual information from the BERT embeddings. Using a bidirectional LSTM has the potential to impprove the performance, as it might be able to better incorporate the contextual information from the BERT embeddings. Another issue with the architecture of the LSTM might be that it is only one layer deep. A deeper LSTM network might be beneficial for using BERT embeddings. Going back to multi-task ViLBERT, its good performance for numbers particularly stands out. A reason for this might be it better ability to generalize, as it is trained significantly on more datasets and tasks than the (single-task) MCAN models.
+%write why ViLBERT might be better
+% reason for better overall accuracy
+An advantage of multi-task ViLBERT might be its bidirectional information stream, which enables information exchange between modalities. This might lead to its ability to make good generalizations and therefore result in high accuracy. 
+
+\cite{lu2020multitask} observe that multi-task training has a regularizing effect on tasks which overfit when trained separately. This could be an advantage over the task-specific MCAN models. 
+
+The good performance of multi-task ViLBERT for numbers particularly stands out. A reason for this might be its better ability to generalize, as it is trained on more datasets and tasks than the single-task MCAN models.
+
+Out of all MCAN models, MCAN with BERT-base encoder performs best in all categories and thus outperforms the MCAN baseline model. The MCAN-model with BERT-large features is the only one that has a lower overall score than the MCAN baseline model. The reason for this might be that the dimensionality for the multi-modal features might be too low to model the question representation well. An indication for this could be that the model does not converge during training at the represented epoch in the table (epoch 13) and did not do so after more epochs either (epoch 16, not included in the table).
+
+Comparing our best performing model MCAN with BERT-base encoder to both MCAN with BERT-base and BERT-large features, the main difference might be the suitability of the encoder for BERT embeddings. Based on the results we could conclude that BERT-base embeddings might not be as well suited for a LSTM encoder. Combining both does also not seem to be a common combination, as we could not find any research literature for comparison/reference. The LSTM we used based on the baseline model is unidirectional, which might prevent the model from making full use of the contextual information from the BERT embeddings. Using a bidirectional LSTM has the potential to improve the performance, as it might be able to better incorporate the contextual information from the BERT embeddings. Another issue with the architecture of the LSTM might be that it is only one layer deep. A deeper LSTM network might be beneficial for using BERT embeddings.
+
+% in VQA models are still likely to ignore images for answering questions
 
 \begin{table}[ht]
 \captionsetup{singlelinecheck = false, justification=justified}
@@ -459,7 +474,7 @@ Table \ref{table:vqa_result} summarizes our results for different MCAN models in
 \label{turns}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l *{4}{d{2.4}} }
 \toprule
- & \multicolumn{1}{c}{Overall} & \multicolumn{1}{c}{Y/N} & \multicolumn{1}{c}{Num} & \multicolumn{1}{c}{Other}\\
+ \multicolumn{1}{l}{Model} & \multicolumn{1}{c}{Overall} & \multicolumn{1}{c}{Y/N} & \multicolumn{1}{c}{Num} & \multicolumn{1}{c}{Other}\\
 \midrule
 \midrule
 MCAN-small (baseline) & 70.63 & 86.82 & 53.26 & 60.72 \\
@@ -467,41 +482,75 @@ MCAN /w BERT-base features & 70.70 & 86.82 & 52.94 & 60.96 \\
 MCAN /w BERT-large features & 70.53 & 86.51 & 53.01 & 60.86  \\
 MCAN /w BERT-base encoder & 71.03 & 87.34 & 53.30 & 61.12 \\
 \midrule
-Multi-task ViLBERT & 72.57 & 88.33 & 56.72 & 62.68 \\
+Multi-task ViLBERT & 72.57\ast & 88.33\ast & 56.72\ast & 62.68\ast \\
 \bottomrule
 \end{tabular*}
-\caption{Accuracies of MCAN models and multi-task ViLBERT on the test-dev split of the VQA 2.0 dataset \citep{goyal2017vqa2}.}
+\caption{Results for MCAN models and multi-task ViLBERT on the test-dev split of the VQA 2.0 dataset \citep{goyal2017vqa2}. Models are evaluated for overall accuracy as well as the accuracies for three different answer types (yes/no, number, and other). Asterisk denotes the best performance on each metric.} % if possible, add a bit information describing the table here 
 \label{table:vqa_result}
 \end{table}
 
 \subsection{Comparison on GQA}
+
+In Table \ref{table:gqa_result} we compare the results for MCAN models and multi-task ViLBERT on the GQA dataset \citep{hudson2019gqa}. We can see that multi-task ViLBERT significantly outperforms the MCAN models in all categories. Compared to the previous results on the VQA 2.0 dataset, the gap between the performance of multi-task ViLBERT and MCAN models is substantially bigger (select numbers?).
+
+%write why ViLBERT might be performing better in general
+
+Advantage of regularization, as previously mentioned. %bidirectional information stream
+
+The better distribution score (lower is better) of multi-task ViLBERT shows that the model not only predicts the most common answers but also the less frequent ones. The reason for this better performance might be that multi-task ViLBERT has been pre-trained on a high count of datasets and categories. This big pool of information/data might allow the model to better indicate more subtle trends in the dataset's distribution.
+The result of multi-task ViLBERT for binary answer types reflect a similar superior performance (to the MCAN models) compared to the yes/no answer type on the VQA 2.0 dataset.
+
+Out of all MCAN models, MCAN with BERT-base features scores the highest accuracy and binary while the baseline MCAN model performs the lowest in all categories. For the distribution metric, a lower score is actually better. (why is the baseline model best at distribution?)
+
+Interestingly, MCAN with BERT-base encoder performs worst out of our modified MCAN models, contrary to our previous VQA 2.0 results. \cite{hudson2019gqa} suggest that different input representations have an impact on the results. They indicate that the more high-level and semantic representations lead to better results. this might be the reason why MCAN with BERT features performs better than with BERT encoder.
+
+%from GQA paper: longer (MAC) networks with more cells are better at GQA task. how do MCAN and ViLBERT compare in length? Does this also affect memory?
+%from GQA paper: Also larger size of training set gives better performance for GQA
+
+% is there anything interesting to say about open questions?
+%\cite{hudson2019gqa} argue that the VQA 2.0 dataset fails to address open questions, leading to a largely unbalanced answer distribution
+
+%reason why ViLBERT is better: maybe multi-tasking, remembers more data, because it's trained on 12 datasets, generalizes well, learns how to relate textual and visual information better, than task-specific. Worse in grounding compared to task-specific model
+
 \begin{table}[ht]
 \captionsetup{singlelinecheck = false, justification=justified}
 \setlength\tabcolsep{0pt} % let LaTeX figure out amount of inter-column whitespace
 \label{turns2}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l *{4}{d{2.4}} }
 \toprule
- & \multicolumn{1}{c}{Accuracy} & \multicolumn{1}{c}{Binary} & \multicolumn{1}{c}{Open} & \multicolumn{1}{c}{Distribution}\\
+ \multicolumn{1}{l}{Model} & \multicolumn{1}{c}{Accuracy} & \multicolumn{1}{c}{Binary} & \multicolumn{1}{c}{Open} & \multicolumn{1}{c}{Distribution}\\
 \midrule
 \midrule
 MCAN-small (baseline) & 53.41 & 70.29 & 38.56 & 1.40 \\
 MCAN /w BERT-base features  & 54.79 & 72.96 & 39.37 & 1.70 \\
-MCAN /w BERT-large features  \\
+MCAN /w BERT-large features  & 54.70 & 72.18 & 39.87 & 1.74\\
 MCAN /w BERT-base encoder  & 53.62 & 71.12 & 38.77 & 1.77\\
 \midrule
-Multi-task ViLBERT  & 59.75 & 78.49 & 43.85 & 1.31 \\
+Multi-task ViLBERT  & 59.75\ast & 78.49\ast & 43.85\ast & 1.31\ast \\
 \bottomrule
 \end{tabular*}
-\caption{lorem ipsum}
+\caption{Results for MCAN models and multi-task ViLBERT on the GQA dataset \citep{hudson2019gqa}. All results refer to the test set. Models are evaluated for overall accuracy as well as accuracies for two different answer types (binary, open). In addition, they are evaluated by the distribution metric, in which case lower is better. Asterisk denotes the best performance on each metric.} 
 \label{table:gqa_result}
 \end{table}
 
-%reason why ViLBERT is better: maybe multi-tasking, remembers more data, because it's trained on 12 datasets, generalizes well, learns how to realte textual and vidual information better, than task-specific better. Worse in grounding compared to task-specific model
-%joint representation for task specific model is better in grounding, might be better at not remembering questions from earlier
-%Mcan model with features gets highest grounding score, (on VQA lower accuracy)
-% larger word representations can help the grounding, 
-
 \subsection{Question Grounding}
+
+Table \ref{table:gqa_grounding} summarizes our results for grounding on the GQA dataset. The grounding score indicates whether the model attends to regions in the image that are relevant for the question. Hence, it shows how successful reasoning is grounded in an image. The MCAN model with BERT-base features performs best on grounding and significantly outperforms multi-task ViLBERT by over 30\%. This is (especially) interesting/surprising, as multi-task ViLBERT has consistently outperformed all MCAN models on the overall accuracy scores/other metrics of VQA 2.0 and GQA. Comparing the best grounding score of ViLBERT (7th attention head, 79.73\%) there is still a difference of over 10\% to the best scoring MCAN model.
+
+The scores of both MCAN models with BERT features are quite similar compared to the remaining MCAN models. This could indicate that feature representations for task-specific models improve grounding. They might be better at not remembering previous questions and be more precise at relating (relevant) textual and visual information. %explain why BERT-base encoder performs worst? 
+
+% maybe add reference for visualization of attention in section 5.5?
+To get a better insight into BERT’s attention in multi-task ViLBERT we calculated the  grounding scores for all 8 attention heads. This allows us to find patterns in the (individual) behavior of the attention heads. \cite{clark2019bert} discovered that some attention heads, especially in lower layers, have very broad attention. The first attention head in multi-task ViLBERT has a comparatively high grounding score. This would lead to the conclusion that ViLBERT gets a higher grounding score on broad attention in that case. % note that this only refers to language
+% discuss 7th head separately % Why does the 7th head have the highest grounding score, what's happening there?
+Multi-task ViLBERT might be good at generalizing, but lacking the ability to focus attention on relevant regions of the image for answering the question. It is still remarkable/striking that multi-task ViLBERT scores a high overall accuracy, despite the answers not being well grounded in the images. It could be possible that multi-task ViLBERT achieves this high accuracy because it remembers previous questions. 
+
+%not sure if this is relevant
+Multi-task ViLBERT's focus/dependence on language might (also) be influenced by its pre-training process. During pre-training visual regions as well as other regions with significant overlap are masked to avoid leaking visual information. This in turn forces the model to rely more heavily on language to predict image content.
+
+% ViLBERT evaluates visual grounding consistency by measuring the overlap in visual concepts between a question and reference (referring expression of image), they count overlapping nouns and adjectives. Why is this only based on language (without looking at the image)?  
+
+% larger word representations can help the grounding, 
+%catastrophic forgetting?
 
 \begin{table}[ht]
 \captionsetup{singlelinecheck = false, justification=justified}
@@ -509,12 +558,12 @@ Multi-task ViLBERT  & 59.75 & 78.49 & 43.85 & 1.31 \\
 \label{turns3}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}} l *{3}{d{2.4}} }
 \toprule
- & \multicolumn{1}{c}{Attention Head} & \multicolumn{1}{c}{Grounding}\\
+ \multicolumn{1}{l}{Model} & \multicolumn{1}{c}{Attention Head} & \multicolumn{1}{c}{Grounding}\\
 \midrule
 \midrule
 MCAN-small (baseline)  & & 86.34 \\
-MCAN /w BERT-base features  & & 90.90\\
-MCAN /w BERT-large features  \\
+MCAN /w BERT-base features  & & 90.90\ast \\
+MCAN /w BERT-large features  & & 89.61 \\
 MCAN /w BERT-base encoder  & & 83.90 \\
 \midrule
 Multi-task ViLBERT  & 1 & 73.35 \\
@@ -529,14 +578,25 @@ Multi-task ViLBERT  & 1 & 73.35 \\
 Multi-task ViLBERT (averaged) & & 58.09 \\
 \bottomrule
 \end{tabular*}
-\caption{lorem ipsum}
+\caption{Results for MCAN models and multi-task ViLBERT on grounding based on the GQA dataset \citep{hudson2019gqa}. The grounding score shows how successful the model attends to regions within the image that are relevant to the question. In addition to the overall grounding scores, we also represent the grounding scores for 8 attention heads of multi-task VilBERT. Asterisk denotes the best performance on the metric.}
 \label{table:gqa_grounding}
 \end{table}
 
 \subsection{Ablation of Fusion Method}
 
+\subsection{Qualitative Analysis}
+We provide a qualitative comparison of grounding capability between MCAN and multi-task ViLBERT on GQA \textit{testdev} set. 
+
+\begin{figure}[!ht]
+	\centering
+	\includegraphics[scale=0.8]{att_visu}
+	\caption{Examples of attention visualization for MCAN and ViLBERT evaluated on GQA test-dev. From left to right are the original image-question pair, prediction and the learned image attention for multi-task ViLBERT, prediction and the learned image attention for MCAN. For ViLBERT, the bounding boxes correspond to the sentence to image attention of the highlighted words in the question. We use different bounding box color when the attention is shared between different words. As for MCAN, we visualize the attention learned by Eq. (\ref{eq_mcan_att}) and highlight the region with highest attention scores.}
+	\label{fig:att_visu}
+\end{figure}
+
 \section{Conclusion and Future Work}
 
+\pagebreak
 \bibliography{sempix}
 
 \end{document}
