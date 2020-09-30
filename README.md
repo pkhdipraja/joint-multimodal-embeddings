@@ -1,1 +1,3 @@
-# joint-multimodal-embeddings
+# Comparing Multimodal Representations in Co-Attention-Based Models for Visual Question Answering
+
+This repository includes code for our paper. We investigate the properties of joint multimodal representations derived from both a task-specific model and a multi-task model with respect to different training objective and information streams. We compare MCAN and multi-task ViLBERT on the VQA task and evaluate their performance on the VQA 2.0 and GQA datasets. We extend the implementation of both <a href="https://github.com/MILVLG/openvqa" target="_blank">**MCAN**</a> and <a href="https://github.com/facebookresearch/vilbert-multi-task" target="_blank">**multi-task ViLBERT**</a>.
