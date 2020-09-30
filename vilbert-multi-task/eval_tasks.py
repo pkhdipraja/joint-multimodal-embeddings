@@ -252,7 +252,10 @@ def main():
         config.task_specific_tokens = True
 
     # set visualization to true
-    config.visualization=True
+    config.visualization = True
+
+    # uncomment this to use sum fusion
+    # config.fusion_method = "sum"
 
     if args.baseline:
         model = BaseBertForVLTasks.from_pretrained(
@@ -293,7 +296,6 @@ def main():
         results = []
         others = []
         for i, batch in enumerate(task_dataloader_val[task_id]):
-#            print("test1\n")
             loss, score, batch_size, results, others = EvaluatingModel(
                 args,
                 task_cfg,
@@ -307,14 +309,12 @@ def main():
                 others,
                 i
             )
-#            print("test2\n")
             tbLogger.step_val(0, float(loss), float(score), task_id, batch_size, "val")
 
             sys.stdout.write("%d/%d\r" % (i, len(task_dataloader_val[task_id])))
             sys.stdout.flush()
         # save the result or evaluate the result.
         ave_score = tbLogger.showLossVal(task_id)
-#        print("test") 
         if args.split:
             json_path = os.path.join(savePath, args.split)
         else:
